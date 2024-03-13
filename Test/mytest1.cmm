@@ -1,7 +1,10 @@
-int add()
+int main()
 {
-    int a, b, c;
-    c = (a + b) - (c * d / (-a)));
-    b = a || c;
-    return b;
+    /*
+    comment
+    /*
+    nested comment
+    */
+    */
+    int i=1;
 }

@@ -2,7 +2,7 @@
 #include "type.h"
 #include "ast.h"
 #include "syntax.tab.h"
-#define debug
+//#define debug
 int yycolumn=1;
 extern int has_error;
 #define YY_USER_ACTION\
@@ -117,6 +117,7 @@ SPACE [\r\t ]
         }
         else if  (a=='\n') yycolumn=1;
         else yycolumn++;
+        if (a!='*') continue;
         b=input();
         if (b==0){
             has_error=1;

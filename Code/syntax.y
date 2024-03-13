@@ -31,8 +31,10 @@ extern int has_error;
 %%
 Program : ExtDefList{
     $$=normalNode(_Program);
-    printf("line: %d\n",$$->nline);
-    printf("loc: %d\n",@$.first_line);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
+    //printf("line: %d\n",$$->nline);
+    //printf("loc: %d\n",@$.first_line);
     addchild($$,$1);
     root=$$;
 }
@@ -43,6 +45,8 @@ ExtDefList : {
 }
 | ExtDef ExtDefList{
     $$=normalNode(_ExtDefList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
@@ -50,17 +54,23 @@ ExtDefList : {
 ;
 ExtDef : Specifier ExtDecList SEMI{
     $$=normalNode(_ExtDef);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Specifier SEMI{
     $$=normalNode(_ExtDef);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
 | Specifier FunDec CompSt{
     $$=normalNode(_ExtDef);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -69,10 +79,14 @@ ExtDef : Specifier ExtDecList SEMI{
 ;
 ExtDecList : VarDec{
     $$=normalNode(_ExtDecList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | VarDec COMMA ExtDecList{
     $$=normalNode(_ExtDecList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -82,16 +96,22 @@ ExtDecList : VarDec{
 
 Specifier : TYPE{
     $$=normalNode(_Specifier);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | StructSpecifier{
     $$=normalNode(_Specifier);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | error {yyerror(),$$=NULL;}
 ;
 StructSpecifier : STRUCT OptTag LC DefList RC{
     $$ = normalNode(_StructSpecifier);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -100,6 +120,8 @@ StructSpecifier : STRUCT OptTag LC DefList RC{
 }
 | STRUCT Tag{
     $$ = normalNode(_StructSpecifier);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
@@ -110,12 +132,16 @@ OptTag : {
 }
 |ID{
     $$=normalNode(_OptTag);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | error {yyerror(),$$=NULL;}
 ;
 Tag : ID{
     $$=normalNode(_Tag);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | error {yyerror(),$$=NULL;}
@@ -123,10 +149,14 @@ Tag : ID{
 
 VarDec : ID{
     $$=normalNode(_VarDec);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | VarDec LB INT RB{
     $$=normalNode(_VarDec);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -136,6 +166,8 @@ VarDec : ID{
 ;
 FunDec : ID LP VarList RP{
     $$=normalNode(_FunDec);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -143,6 +175,8 @@ FunDec : ID LP VarList RP{
 }
 | ID LP RP{
     $$=normalNode(_FunDec);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -151,18 +185,24 @@ FunDec : ID LP VarList RP{
 ;
 VarList : ParamDec COMMA VarList{
     $$=normalNode(_VarList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | ParamDec{
     $$=normalNode(_VarList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | error {yyerror(),$$=NULL;}
 ;
 ParamDec : Specifier VarDec{
     $$=normalNode(_ParamDec);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
@@ -171,6 +211,8 @@ ParamDec : Specifier VarDec{
 
 CompSt : LC DefList StmtList RC{
     $$=normalNode(_CompSt);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -183,6 +225,8 @@ StmtList : {
 }
 | Stmt StmtList{
     $$=normalNode(_StmtList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
@@ -190,21 +234,29 @@ StmtList : {
 ;
 Stmt : Exp SEMI{
     $$=normalNode(_Stmt);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
 | CompSt{
     $$=normalNode(_Stmt);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | RETURN Exp SEMI{
     $$=normalNode(_Stmt);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE{
     $$=normalNode(_Stmt);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -213,6 +265,8 @@ Stmt : Exp SEMI{
 }
 | IF LP Exp RP Stmt ELSE Stmt{
     $$=normalNode(_Stmt);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -223,6 +277,8 @@ Stmt : Exp SEMI{
 }
 | WHILE LP Exp RP Stmt{
     $$=normalNode(_Stmt);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -237,6 +293,8 @@ DefList : {
 }
 | Def DefList{
     $$=normalNode(_DefList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
@@ -244,6 +302,8 @@ DefList : {
 ;
 Def : Specifier DecList SEMI{
     $$=normalNode(_Def);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -252,10 +312,14 @@ Def : Specifier DecList SEMI{
 ;
 DecList : Dec{
     $$=normalNode(_DecList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | Dec COMMA DecList{
     $$=normalNode(_DecList);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -264,10 +328,14 @@ DecList : Dec{
 ;
 Dec : VarDec{
     $$=normalNode(_Dec);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | VarDec ASSIGNOP Exp{
     $$=normalNode(_Dec);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -277,70 +345,94 @@ Dec : VarDec{
 
 Exp : Exp ASSIGNOP Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp AND Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp OR Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp RELOP Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp PLUS Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp MINUS Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp STAR Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp DIV Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | LP Exp RP{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | MINUS Exp %prec NEG{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
 | NOT Exp{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
 }
 | ID LP Args RP{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -348,12 +440,16 @@ Exp : Exp ASSIGNOP Exp{
 }
 | ID LP RP{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp LB Exp RB{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
@@ -361,32 +457,44 @@ Exp : Exp ASSIGNOP Exp{
 }
 | Exp DOT ID{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | ID{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | INT{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | FLOAT{
     $$=normalNode(_Exp);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | error {yyerror(),$$=NULL;}
 ;
 Args : Exp COMMA Args{
     $$=normalNode(_Args);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
     addchild($$,$2);
     addchild($$,$3);
 }
 | Exp{
     $$=normalNode(_Args);
+    $$->nline=@$.first_line;
+    $$->ncol=@$.first_column;
     addchild($$,$1);
 }
 | error {yyerror(),$$=NULL;}
@@ -395,5 +503,5 @@ Args : Exp COMMA Args{
 void yyerror(){
     has_error=1;
     if (!has_raise[yylloc.first_line])
-        printf("error type B at Line %d.\n",yylloc.first_line),has_raise[yylloc.first_line]=1;
+        printf("Error type B at Line %d: Syntax error.\n",yylloc.first_line),has_raise[yylloc.first_line]=1;
 }
