@@ -11,4 +11,10 @@ typedef enum
     EQ,
     NE
 } reloptype;
+typedef enum
+{
+    ttype_int,
+    ttype_float
+}
+ttype;
 #endif
