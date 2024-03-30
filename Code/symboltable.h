@@ -13,6 +13,8 @@ typedef enum sym_kind {
     SYM_ARRAY,
     SYM_STRUCT,
     SYM_FUNC,
+    SYM_TYPE,
+    SYM_EMPTY
 } sym_kind;
 typedef struct sym_type {
     sym_kind kind;
@@ -33,6 +35,7 @@ typedef struct sym_type {
             struct param_node *param_types;
             struct sym_type *return_type;
         } func_info;
+        struct sym_type* type_info;
     };
 } sym_type;
 typedef struct field_node{
@@ -52,11 +55,20 @@ typedef struct sym_entry
     int line, col;
     struct sym_entry *next;
 } sym_entry;
-
-sym_entry *symtable;
-sym_entry *find_entry(char *name);
-sym_entry *add_entry(sym_entry *); // if already existed, return the duplicate entry. if successful, return NULL
+typedef struct type_entry{
+    char name[40];
+    sym_entry* type;
+    struct type_entry* next;
+} type_entry;
+sym_entry* symtable;
+type_entry* typetable;
+sym_entry* find_sym_entry(char* name);
+sym_entry *add_sym_entry(sym_entry *); // if already existed, return the duplicate entry. if successful, return NULL
+type_entry* find_type_entry(char* name);
+type_entry* add_type_entry(type_entry*);
 void init_symtable();
-sym_entry* new_sym_entry(Node* node,sym_type* type);
+void init_typetable();
+sym_entry* new_sym_entry(Node* node, sym_type* type);
 void print_symtable();
+sym_type* new_empty_type();
 #endif

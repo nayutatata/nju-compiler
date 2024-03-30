@@ -2,6 +2,7 @@
 #include "ast.h"
 #include "symboltable.h"
 #include "semantic.h"
+#include <assert.h>
 extern Node *root;
 extern FILE *yyin;
 int has_error = 0;
@@ -18,7 +19,9 @@ int main(int argc, char **argv)
     if (!has_error){
         print_ast();
         init_symtable();
+        init_typetable();
         semantic_analysis(root);
+        print_symtable();
     }
     return 0;
 }
