@@ -72,6 +72,7 @@ void handle_extdeclist(Node* r,sym_type* type){
     }
 }
 sym_type* handle_specifier(Node *r){
+    assert(r->ntype == _Specifier);
     Node* child = getchild(r, 0);
     sym_type* res = malloc(sizeof(sym_type));
     if (child->ntype == _TYPE) {
@@ -174,7 +175,8 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim){
     return handle_vardec(getchild(r, 0), type, dim + 1);
 }
 void handle_funcdec(Node* r,sym_type* return_type){
-    Node* id = getchild(r, 0); // this is an ID node
+    assert(r->ntype == _FunDec);
+    Node* id = getchild(r, 0);  // this is an ID node
     sym_entry* se,*detect = find_sym_entry(id->val.name);
     sym_type* t;
     t->kind = SYM_FUNC;
@@ -195,6 +197,7 @@ void handle_funcdec(Node* r,sym_type* return_type){
     add_sym_entry(se);
 }
 param_node* handle_varlist(Node* r){
+    assert(r->ntype == _VarList);
     param_node* res = malloc(sizeof(param_node));
     if (r->ccnt==1)
         return handle_paramdec(getchild(r, 0));
@@ -202,38 +205,45 @@ param_node* handle_varlist(Node* r){
     return res;
 }
 param_node* handle_paramdec(Node* r){
+    assert(r->ntype == _ParamDec);
     param_node* res = malloc(sizeof(param_node));
     res->type = handle_specifier(getchild(r, 0));
     res->next = NULL;
     return res;
 }
 void handle_compst(Node* r){
+    assert(r->ntype == _CompSt);
     Node* deflist = getchild(r, 1);
     Node* stmtlist = getchild(r, 2);
     handle_deflist(deflist);
     handle_stmtlist(stmtlist);
 }
 void handle_stmtlist(Node* r){
+    assert(r->ntype == _StmtList);
     nop();
 }
 void handle_stmt(Node* r){
+    assert(r->ntype == _Stmt);
     nop();
 }
 field_node* handle_deflist(Node* r){ // in fact we need this to return something for struct definition
     if (!r)
         return NULL;
+    assert(r->ntype == _DefList);
     field_node* res = handle_def(getchild(r, 0));
     assert(res);
     res->next = handle_deflist(getchild(r, 1));
     return res;
 }
 field_node* handle_def(Node* r){
+    assert(r->ntype == _Def);
     Node *specifier = getchild(r, 0), *declist = getchild(r, 1);
     sym_type* type = handle_specifier(specifier);
     field_node* res = handle_declist(declist, type);
     return res;
 }
 field_node* handle_declist(Node* r,sym_type* type){
+    assert(r->ntype == _DecList);
     Node* dec = getchild(r, 0);
     field_node* res = handle_dec(dec, type);
     assert(r);
@@ -245,6 +255,7 @@ field_node* handle_declist(Node* r,sym_type* type){
 }
 field_node* handle_dec(Node* r,sym_type* type){
     assert(r->ntype == _Dec);
+    assert(r->ntype == _Dec);
     Node* vardec = getchild(r, 0);
     assert(r);
     if (r->ccnt == 1) {
@@ -253,8 +264,10 @@ field_node* handle_dec(Node* r,sym_type* type){
     nop(); // VarDec ASSIGNOP Exp not implemented yet.
 }
 void handle_exp(Node* r){
+    assert(r->ntype == _Exp);
     nop();
 }
 void handle_args(Node* r){
+    assert(r->ntype == _Args);
     nop();
 }
