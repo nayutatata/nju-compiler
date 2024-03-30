@@ -1,5 +1,5 @@
 **/*.o
 **/syntax.*
 **/parser
-**/.zip
-**/.pdf
+**/*.zip
+**/*.pdf
