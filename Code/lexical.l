@@ -5,6 +5,7 @@
 //#define debug
 int yycolumn=1;
 extern int has_error;
+extern int has_raise[];
 #define YY_USER_ACTION\
     yylloc.first_line=yylloc.last_line=yylineno;\
     yylloc.first_column=yycolumn;\
@@ -133,9 +134,14 @@ SPACE [\r\t ]
 }
 {digit}+{letter}+ {
     has_error=1;
-    printf("Error type A at Line %d: invalid indentifier \"%s\"\n",yylineno,yytext);
+    if (!has_raise[yylloc.first_line])
+        printf("Error type A at Line %d: invalid indentifier \"%s\"\n",yylineno,yytext),has_raise[yylloc.first_line]=1;
+    
 }
-. {has_error=1;printf("Error type A at Line %d: Mysterious character \"%s\"\n",yylineno,yytext);}
+. {has_error=1;
+        if (!has_raise[yylloc.first_line])
+    printf("Error type A at Line %d: Mysterious character \"%s\"\n",yylineno,yytext),has_raise[yylloc.first_line]=1;
+}
 %%
 void action(char* a,char* contain){
 #ifdef debug

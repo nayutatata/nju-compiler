@@ -1,0 +1,5 @@
+**/*.o
+**/syntax.*
+**/parser
+**/.zip
+**/.pdf
