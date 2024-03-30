@@ -42,4 +42,5 @@ void addchild(Node *pa, Node *child);
 void print_ast();
 void helper(Node*,int);
 int is_token(Symbol);
+Node *getchild(Node*,int);
 #endif

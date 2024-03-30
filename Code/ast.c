@@ -100,3 +100,8 @@ void helper(Node* r,int space){
         helper(r->children[i], space + 1);
     }
 }
+Node* getchild(Node* r,int i){
+    if (i<0||i>=r->ccnt)
+        return NULL;
+    return r->children[i];
+}
