@@ -60,6 +60,10 @@ typedef struct type_entry{
     sym_entry* type;
     struct type_entry* next;
 } type_entry;
+typedef struct frame_t{
+    sym_entry* symtable;
+    struct frame_t* next;
+} frame_t;
 sym_entry* symtable;
 type_entry* typetable;
 sym_entry* find_sym_entry(char* name);
@@ -71,4 +75,5 @@ void init_typetable();
 sym_entry* new_sym_entry(Node* node, sym_type* type);
 void print_symtable();
 sym_type* new_empty_type();
+void init_frame();
 #endif

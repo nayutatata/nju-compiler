@@ -19,6 +19,7 @@ int main(int argc, char **argv)
     if (!has_error){
         print_ast();
         init_symtable();
+        init_frame();
         init_typetable();
         semantic_analysis(root);
         print_symtable();

@@ -1,5 +1,8 @@
 struct A{
-    int a,b,d;
-    int lll;
-} c;
-struct A lol;
+    int a,b;
+    int c[1][2];
+};
+
+int func(struct A a[1][2]){
+
+}

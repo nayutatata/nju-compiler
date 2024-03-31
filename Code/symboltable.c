@@ -3,9 +3,58 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+frame_t* frame;
 static char* print_table[] = {
-    "BASIC","ARRAY","STRUCT","FUNC","TYPE","EMPTY"
-};
+    "BASIC", "ARRAY", "STRUCT", "FUNC", "TYPE", "EMPTY"};
+static char* show_info(sym_type* type){
+    if (!type)
+        return "null";
+    sym_kind kind = type->kind;
+    char* res = malloc(60);
+    res[0] = '\0';
+    if (kind == SYM_BASIC) {
+        if (type->basic_info==SYM_INT){
+            sprintf(res, "int");
+        }
+        else
+            sprintf(res, "float");
+        return res;
+    }
+    if (kind==SYM_ARRAY){
+        char* a = show_info(type->array_info.type);
+        sprintf(res, "array of %s, dim: %d", a, type->array_info.num);
+        return res;
+    }
+    if (kind==SYM_FUNC){
+        param_node* fn = type->func_info.param_types;
+        char* params = malloc(40);
+        params[0] = '\0';
+        while (fn){
+            char* a = show_info(fn->type);
+            strcat(params, a);
+            strcat(params, " ");
+            fn = fn->next;
+        }
+        char* returns = show_info(type->func_info.return_type);
+        sprintf(res, "params_type: %s, return_type: %s.", params, returns);
+        return res;
+    }
+    if (kind==SYM_STRUCT){
+        field_node* fn = type->struct_info;
+        while (fn){
+            strcat(res, "name: ");
+            strcat(res, fn->name);
+            strcat(res, " ,type: ");
+            strcat(res, show_info(fn->type));
+            strcat(res, ". ");
+            fn = fn->next;
+        }
+        return res;
+    }
+    if (kind==SYM_TYPE){
+        return show_info(type->type_info);
+    }
+}
 sym_entry* find_sym_entry(char* name) {
     assert(name != NULL);
     sym_entry *head = symtable->next;
@@ -47,9 +96,14 @@ type_entry* add_type_entry(type_entry* entry) {
 void print_symtable(){
     sym_entry *head = symtable->next;
     while (head){
-        printf("name: %s, type: %s, line: %d\n", head->name, print_table[head->type->kind], head->line);
+        printf("name: %s, type: %s, line: %d. unique information is followed: %s\n", head->name, print_table[head->type->kind], head->line,show_info(head->type));
         head = head->next;
     }
+}
+void init_frame(){
+    frame = malloc(sizeof(frame_t));
+    frame->symtable = symtable;
+    frame->next = NULL;
 }
 void init_symtable(){
     symtable = malloc(sizeof(sym_entry)); // dummy node
@@ -74,6 +128,18 @@ sym_type* new_empty_type(){
     sym_type* res = malloc(sizeof(sym_type));
     res->kind = SYM_EMPTY;
     return res;
+}
+void new_frame(){
+    frame_t* new_frame = malloc(sizeof(frame_t));
+    new_frame->symtable = malloc(sizeof(sym_entry)); // dummy node
+    new_frame->symtable->next = NULL;
+    new_frame->next = frame;
+    frame = new_frame;
+    symtable = new_frame->symtable;
+}
+void pop_frame(){
+    frame = frame->next;
+    symtable = frame->symtable;
 }
 /*
 int main(){

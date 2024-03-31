@@ -58,8 +58,8 @@ void handle_extdef(Node *r){
     if (child1->ntype == _ExtDecList) {
         handle_extdeclist(child1, type);
     } else if (child1->ntype == _FunDec) {
-        handle_funcdec(child1,type);
-        handle_compst(getchild(r, 2));
+        sym_type* t = handle_funcdec(child1,type);
+        handle_compst(getchild(r, 2),t);
     }
 }
 void handle_extdeclist(Node* r,sym_type* type){
@@ -141,7 +141,7 @@ sym_type* handle_tag(Node* r){
         return new_empty_type(); // the type not found.
     }
 }
-field_node* handle_vardec(Node *r,sym_type* type,int dim){
+field_node* handle_vardec(Node *r,sym_type* type,int dim){ // in fact this return-type is not good, the right one should be sym_type, but I can get it by return-val->type, haha
     assert(r->ntype == _VarDec);
     if (r->ccnt == 1) {
         field_node* res = malloc(sizeof(field_node));
@@ -153,7 +153,7 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim){
             sym_entry* detect = find_sym_entry(se->name);
             if (detect){
                 semantic_error(3, getchild(r,0)->nline); // redefinition
-                return NULL;
+                return res; // I don't know whether it can work
             }
             add_sym_entry(se);
             return res;
@@ -167,62 +167,73 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim){
         sym_entry* detect = find_sym_entry(se->name);
         if (detect) {
             semantic_error(3, r->nline);  // redefinition
-            return NULL;
+            return res;                   // I don't know whether it can work
         }
         add_sym_entry(se);
         return res;
     }
     return handle_vardec(getchild(r, 0), type, dim + 1);
 }
-void handle_funcdec(Node* r,sym_type* return_type){
+sym_type* handle_funcdec(Node* r,sym_type* return_type){
     assert(r->ntype == _FunDec);
     Node* id = getchild(r, 0);  // this is an ID node
     sym_entry* se,*detect = find_sym_entry(id->val.name);
-    sym_type* t;
+    sym_type* t = malloc(sizeof(sym_type));
     t->kind = SYM_FUNC;
     t->func_info.return_type = return_type;
     if (detect) {
         semantic_error(4, id->nline);
-        return;
+        return new_empty_type();
     }
     if (r->ccnt==3){
         t->func_info.param_types = NULL;
         se = new_sym_entry(id, t);
         add_sym_entry(se);
-        return;
+        return new_empty_type();
     }
-    param_node* type_list = handle_varlist(r);
+    param_node* type_list = handle_varlist(getchild(r,2));
     t->func_info.param_types = type_list;
     se = new_sym_entry(id, t);
     add_sym_entry(se);
+    return t;
 }
 param_node* handle_varlist(Node* r){
     assert(r->ntype == _VarList);
-    param_node* res = malloc(sizeof(param_node));
-    if (r->ccnt==1)
-        return handle_paramdec(getchild(r, 0));
+    param_node* res = handle_paramdec(getchild(r, 0));
+    if (r->ccnt == 1)
+        return res;
     res->next = handle_varlist(getchild(r, 2));
     return res;
 }
 param_node* handle_paramdec(Node* r){
     assert(r->ntype == _ParamDec);
+    Node* vardec = getchild(r, 1);
+    Node* specifier = getchild(r, 0);
+    sym_type* t = handle_specifier(specifier);
+    field_node* fn = handle_vardec(vardec, t, 0);
     param_node* res = malloc(sizeof(param_node));
-    res->type = handle_specifier(getchild(r, 0));
     res->next = NULL;
+    res->type = fn->type;
     return res;
 }
-void handle_compst(Node* r){
+void handle_compst(Node* r,sym_type* func_type){
     assert(r->ntype == _CompSt);
+    assert(func_type == NULL || func_type->kind == SYM_FUNC || func_type->kind == SYM_EMPTY); // compst may be follow a func definition.
     Node* deflist = getchild(r, 1);
     Node* stmtlist = getchild(r, 2);
     handle_deflist(deflist);
     handle_stmtlist(stmtlist);
 }
-void handle_stmtlist(Node* r){
+void handle_stmtlist(Node* r){ 
+    if (!r)
+        return;
     assert(r->ntype == _StmtList);
-    nop();
+    Node* stmt = getchild(r, 0);
+    Node* stmtlist = getchild(r, 1);
+    handle_stmt(stmt);
+    handle_stmtlist(stmtlist);
 }
-void handle_stmt(Node* r){
+void handle_stmt(Node* r){          // if stmt is a return stmt, then we should check whether the return type is right. so we need a func type
     assert(r->ntype == _Stmt);
     nop();
 }
@@ -232,8 +243,11 @@ field_node* handle_deflist(Node* r){ // in fact we need this to return something
     assert(r->ntype == _DefList);
     field_node* res = handle_def(getchild(r, 0));
     assert(res);
-    res->next = handle_deflist(getchild(r, 1));
-    return res;
+    field_node* t = handle_deflist(getchild(r, 1));
+    if (!t)
+        return res;
+    t->next = res;
+    return t;
 }
 field_node* handle_def(Node* r){
     assert(r->ntype == _Def);
@@ -247,14 +261,15 @@ field_node* handle_declist(Node* r,sym_type* type){
     Node* dec = getchild(r, 0);
     field_node* res = handle_dec(dec, type);
     assert(r);
-    if (r->ccnt == 1)
+    if (r->ccnt == 1){
+        res->next = NULL;
         return res;
+    }
     assert(res);
     res->next = handle_declist(getchild(r, 2), type);
     return res;
 }
 field_node* handle_dec(Node* r,sym_type* type){
-    assert(r->ntype == _Dec);
     assert(r->ntype == _Dec);
     Node* vardec = getchild(r, 0);
     assert(r);
