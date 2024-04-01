@@ -98,6 +98,7 @@ sym_entry* add_sym_entry(sym_entry* entry){
     sym_entry *found = find_sym_entry_frame(entry->name);
     if (found)
         return found;
+    assert(symtable == frame->symtable);
     entry->next = symtable->next;
     symtable->next = entry;
     return NULL;
@@ -116,6 +117,7 @@ void print_symtable(){
         printf("name: %s, type: %s, line: %d. unique information is followed: %s\n", head->name, print_table[head->type->kind], head->line,show_info(head->type));
         head = head->next;
     }
+    puts("======================");
 }
 void init_frame(){
     frame = malloc(sizeof(frame_t));
@@ -193,10 +195,11 @@ int type_eq(sym_type* t1,sym_type* t2){
         }
         return l1 == NULL && l2 == NULL;
     }
-    assert(0);
+    //assert(0);
 }
 int can_logic(sym_type* t){
-    return t->kind == SYM_BASIC && t->kind == SYM_INT;
+    assert(t);
+    return t->kind == SYM_BASIC && t->basic_info == SYM_INT;
 }
 /*
 int main(){

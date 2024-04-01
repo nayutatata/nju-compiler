@@ -17,10 +17,10 @@ int main(int argc, char **argv)
     yyrestart(yyin);
     yyparse();
     if (!has_error){
-        print_ast();
+        //print_ast();
         init_symtable();
         init_frame();
-        init_typetable();
+        //init_typetable();
         semantic_analysis(root);
         print_symtable();
     }
