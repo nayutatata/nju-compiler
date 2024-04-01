@@ -78,4 +78,5 @@ void new_frame();
 void pop_frame();
 int type_eq(sym_type* t1, sym_type* t2);
 char* show_info(sym_type* type);
+int can_logic(sym_type* type);
 #endif

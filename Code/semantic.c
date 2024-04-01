@@ -17,7 +17,7 @@ static const char* print_table[] = {
     "redefinition of function.",
     "different type beside '=' .",
     "try to assign to right-side value.",
-    "oprand type dismatch or the type has no operator.",
+    "operand type dismatch or the type has no operator.",
     "return-type dismatch.",
     "arguements dismatch with parameters.",
     "var has no operator '[]' .",
@@ -156,7 +156,7 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim){ // in fact this retur
                 semantic_error(3, getchild(r,0)->nline); // redefinition
                 return res; // I don't know whether it can work
             }
-            add_sym_entry(se);
+            add_sym_entry(se);// actually if it is a parameter, then it should not be added. some error here.
             return res;
         }
         sym_type* array_type = malloc(sizeof(sym_type));
@@ -274,6 +274,18 @@ void handle_stmt(Node* r, sym_type* func_type){          // if stmt is a return 
         }
         return;
     }
+    if (r->ccnt>=5){
+        Node* exp = getchild(r, 2);
+        sym_type* exp_type = handle_exp(exp);
+        if (!can_logic(exp_type)){
+            semantic_error(7, exp->nline);
+        }
+        Node* stmt1 = getchild(r, 4);
+        handle_stmt(stmt1,NULL);
+        if (r->ccnt==7)
+            handle_stmt(getchild(r, 6), NULL);
+        return;
+    }
     assert(0);
 }
 field_node* handle_deflist(Node* r){ // in fact we need this to return something for struct definition
@@ -311,11 +323,15 @@ field_node* handle_declist(Node* r,sym_type* type){
 field_node* handle_dec(Node* r,sym_type* type){
     assert(r->ntype == _Dec);
     Node* vardec = getchild(r, 0);
-    assert(r);
-    if (r->ccnt == 1) {
-        return handle_vardec(vardec,type,0);
+    field_node* fn = handle_vardec(vardec,type,0);
+    if (r->ccnt==1)
+        return fn;
+    Node* exp = getchild(r,2);
+    sym_type* exp_type = handle_exp(exp);
+    if (!type_eq(exp_type,fn->type)){
+        semantic_error(5, exp->nline);
     }
-    nop(); // VarDec ASSIGNOP Exp not implemented yet.
+    return fn;
 }
 sym_type* handle_exp(Node* r){
     assert(r->ntype == _Exp);
@@ -329,10 +345,128 @@ sym_type* handle_exp(Node* r){
             }
             return detect->type;
         }
+        if (child->ntype==_INT){
+            sym_type* t = malloc(sizeof(sym_type));
+            t->kind=SYM_BASIC;
+            t->basic_info = SYM_INT;
+            return t;
+        } else {
+            sym_type* t = malloc(sizeof(sym_type));
+            t->kind = SYM_BASIC;
+            t->basic_info = SYM_FLOAT;
+            return t;
+        }
+        assert(0);
     }
-    nop();
+    else if (r->ccnt==2){
+        Node* exp1 = getchild(r, 1);
+        sym_type* exp_type = handle_exp(exp1);
+        Node* op = getchild(r, 0);
+        if (op->ntype==_NOT){
+            if (!can_logic(exp_type)){
+                semantic_error(7, exp1->nline);
+            }
+        }
+        return exp_type;
+    }
+    else if (r->ccnt==3){
+        Node *child0 = getchild(r, 0), *child2 = getchild(r, 2);
+        if (child0->ntype==_Exp&&child2->ntype==_Exp){
+            Node* op = getchild(r, 1);
+            sym_type *exp_type0 = handle_exp(child0), *exp_type2 = handle_exp(child2);
+            if (op->ntype == _AND || op->ntype == _OR) {
+                if (!can_logic(exp_type0)||!can_logic(exp_type2)){
+                    semantic_error(7, child0->nline);
+                    return new_empty_type(); // I don't know whether it's right.
+                }
+                return exp_type0;
+            } else if (!type_eq(exp_type0, exp_type2)) {
+                semantic_error(7, child0->nline);
+                return new_empty_type();
+            }
+            return exp_type0;
+        }
+        else if (child0->ntype==_LP){
+            return handle_exp(getchild(r, 1));
+        }
+        else if (child0->ntype==_Exp){ // struct
+            sym_type* struct_type = handle_exp(child0);
+            if (!struct_type->kind!=SYM_STRUCT){
+                semantic_error(13, child0->nline);
+                return new_empty_type();
+            }
+            field_node* finder = struct_type->struct_info;
+            while (finder){
+                if (strcmp(finder->name,child2->val.name)==0){
+                    break;
+                }
+                finder = finder->next;
+            }
+            if (!finder){
+                semantic_error(14, child2->nline);
+                return new_empty_type();
+            }
+            return finder->type;
+        }
+        else if (child0->ntype==_ID){
+            sym_entry* se = find_sym_entry(child0->val.name);
+            if (!se){
+                semantic_error(2, child0->nline);
+                return new_empty_type();
+            }
+            if (se->type->kind!=SYM_FUNC){
+                semantic_error(11, child0->ntype);
+                return new_empty_type();
+            }
+            if (se->type->func_info.num!=0){
+                semantic_error(9, child0->ntype);
+                return se->type->func_info.return_type;
+            }
+            return se->type->func_info.return_type;
+        }
+        assert(0);
+    } else if (r->ccnt == 4) {
+        Node *child0 = getchild(r, 0), *child2 = getchild(r, 2);
+        if (child0->ntype==_ID){
+            sym_entry* se = find_sym_entry(child0->val.name);
+            if (!se) {
+                semantic_error(2, child0->nline);
+                return new_empty_type();
+            }
+            if (se->type->kind != SYM_FUNC) {
+                semantic_error(11, child0->ntype);
+                return new_empty_type();
+            }
+            field_node* args = handle_args(child2);
+            field_node* params = se->type->func_info.param_types;
+            while (args&&params){
+                if (!type_eq(args->type,params->type)){
+                    break;
+                }
+                args = args->next, params = params->next;
+            }
+            if (args!=NULL||params!=NULL){
+                semantic_error(9, child0->ntype);
+            }
+            return se->type->func_info.return_type;
+        }
+        if (child0->ntype==_Exp){
+            sym_type *exp_type0 = handle_exp(child0), *exp_type2 = handle_exp(child2);
+            if (exp_type0->kind!=SYM_ARRAY){
+                semantic_error(10, child0->nline);
+                return new_empty_type();
+            }
+            sym_type* basic = exp_type0->array_info.type;
+            if (!can_logic(exp_type2)){
+                semantic_error(12, child2->nline);
+            }
+            return basic;
+        }
+        assert(0);
+    }
+    assert(0);
 }
-void handle_args(Node* r){
+field_node* handle_args(Node* r){
     assert(r->ntype == _Args);
     nop();
 }

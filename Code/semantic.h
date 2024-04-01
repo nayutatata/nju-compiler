@@ -26,7 +26,7 @@ field_node* handle_def(Node *r);
 field_node* handle_declist(Node *r, sym_type* type);
 field_node* handle_dec(Node *r, sym_type* type);
 sym_type* handle_exp(Node *r);
-void handle_args(Node *r);
+field_node* handle_args(Node *r);
 extern frame_t* frame;
 extern sym_entry* symtable;
 #endif

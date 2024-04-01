@@ -195,6 +195,9 @@ int type_eq(sym_type* t1,sym_type* t2){
     }
     assert(0);
 }
+int can_logic(sym_type* t){
+    return t->kind == SYM_BASIC && t->kind == SYM_INT;
+}
 /*
 int main(){
     init_symtable();
