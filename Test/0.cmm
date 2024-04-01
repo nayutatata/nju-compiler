@@ -1,6 +1,0 @@
-struct A{
-    int a,b,c,d;
-    int e;
-    int f;
-    int g;
-};
