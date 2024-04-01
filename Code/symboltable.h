@@ -32,7 +32,7 @@ typedef struct sym_type {
         } basic_info;
         struct{
             int num; // number of parameters
-            struct param_node *param_types;
+            struct field_node *param_types;
             struct sym_type *return_type;
         } func_info;
         struct sym_type* type_info;
@@ -43,10 +43,6 @@ typedef struct field_node{
     sym_type *type;
     struct field_node *next;
 } field_node;
-typedef struct param_node{
-    sym_type *type;
-    struct param_node *next;
-} param_node;
 // the following is definition of symbol table
 typedef struct sym_entry
 {
@@ -66,8 +62,10 @@ typedef struct frame_t{
 } frame_t;
 sym_entry* symtable;
 type_entry* typetable;
+frame_t* frame;
 sym_entry* find_sym_entry(char* name);
 sym_entry *add_sym_entry(sym_entry *); // if already existed, return the duplicate entry. if successful, return NULL
+sym_entry* find_sym_entry_frame(char* name);
 type_entry* find_type_entry(char* name);
 type_entry* add_type_entry(type_entry*);
 void init_symtable();
@@ -76,4 +74,8 @@ sym_entry* new_sym_entry(Node* node, sym_type* type);
 void print_symtable();
 sym_type* new_empty_type();
 void init_frame();
+void new_frame();
+void pop_frame();
+int type_eq(sym_type* t1, sym_type* t2);
+char* show_info(sym_type* type);
 #endif

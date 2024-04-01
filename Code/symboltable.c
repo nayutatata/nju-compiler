@@ -6,7 +6,7 @@
 frame_t* frame;
 static char* print_table[] = {
     "BASIC", "ARRAY", "STRUCT", "FUNC", "TYPE", "EMPTY"};
-static char* show_info(sym_type* type){
+char* show_info(sym_type* type){
     if (!type)
         return "null";
     sym_kind kind = type->kind;
@@ -26,17 +26,18 @@ static char* show_info(sym_type* type){
         return res;
     }
     if (kind==SYM_FUNC){
-        param_node* fn = type->func_info.param_types;
-        char* params = malloc(40);
-        params[0] = '\0';
-        while (fn){
-            char* a = show_info(fn->type);
-            strcat(params, a);
-            strcat(params, " ");
+        field_node* fn = type->func_info.param_types;
+        strcat(res, "params: ");
+        while (fn) {
+            strcat(res, "name: ");
+            strcat(res, fn->name);
+            strcat(res, " ,type: ");
+            strcat(res, show_info(fn->type));
+            strcat(res, ". ");
             fn = fn->next;
         }
-        char* returns = show_info(type->func_info.return_type);
-        sprintf(res, "params_type: %s, return_type: %s.", params, returns);
+        strcat(res, "return-type: ");
+        strcat(res, show_info(type->func_info.return_type));
         return res;
     }
     if (kind==SYM_STRUCT){
@@ -57,9 +58,25 @@ static char* show_info(sym_type* type){
 }
 sym_entry* find_sym_entry(char* name) {
     assert(name != NULL);
-    sym_entry *head = symtable->next;
-    while (head){
-        if (strcmp(name,head->name)==0){
+    frame_t* now_frame = frame;
+    while (now_frame){
+        sym_entry* head = now_frame->symtable->next;
+        while (head) {
+            if (strcmp(name, head->name) == 0) {
+                return head;
+            }
+            head = head->next;
+        }
+        now_frame = now_frame->next;
+    }
+    return NULL;
+}
+sym_entry* find_sym_entry_frame(char* name){
+    assert(name != NULL);
+    frame_t* now_frame = frame;
+    sym_entry* head = now_frame->symtable->next;
+    while (head) {
+        if (strcmp(name, head->name) == 0) {
             return head;
         }
         head = head->next;
@@ -78,7 +95,7 @@ type_entry* find_type_entry(char* name){
     return NULL;
 }
 sym_entry* add_sym_entry(sym_entry* entry){
-    sym_entry *found = find_sym_entry(entry->name);
+    sym_entry *found = find_sym_entry_frame(entry->name);
     if (found)
         return found;
     entry->next = symtable->next;
@@ -140,6 +157,43 @@ void new_frame(){
 void pop_frame(){
     frame = frame->next;
     symtable = frame->symtable;
+}
+int type_eq(sym_type* t1,sym_type* t2){
+    assert(t1 && t2);
+    if (t1->kind != t2->kind)
+        return 0;
+    sym_kind kind = t1->kind;
+    if (kind==SYM_BASIC){
+        return t1->basic_info == t2->basic_info;
+    }
+    if (kind==SYM_ARRAY){
+        return t1->array_info.num == t2->array_info.num && type_eq(t1->array_info.type, t2->array_info.type);
+    }
+    if (kind==SYM_FUNC){
+        if (!type_eq(t1->func_info.return_type,t2->func_info.return_type))
+            return 0;
+        if (t1->func_info.num!=t2->func_info.num)
+            return 0;
+        field_node *l1 = t1->func_info.param_types, *l2 = t2->func_info.param_types;
+        while (l1&&l2){
+            if (!type_eq(l1->type,l2->type))
+                return 0;
+            l1 = l1->next, l2 = l2->next;
+        }
+        return l1 == NULL && l2 == NULL;
+    }
+    if (kind==SYM_STRUCT){
+        field_node *l1 = t1->struct_info, *l2 = t2->struct_info;
+        while (l1&&l2){
+            if (strcmp(l1->name,l2->name)!=0)
+                return 0;
+            if (!type_eq(l1->type,l2->type))
+                return 0;
+            l1 = l1->next, l2 = l2->next;
+        }
+        return l1 == NULL && l2 == NULL;
+    }
+    assert(0);
 }
 /*
 int main(){
