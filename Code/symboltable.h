@@ -64,7 +64,7 @@ sym_entry* symtable;
 type_entry* typetable;
 frame_t* frame;
 sym_entry* find_sym_entry(char* name);
-sym_entry *add_sym_entry(sym_entry *); // if already existed, return the duplicate entry. if successful, return NULL
+sym_entry *add_sym_entry(sym_entry * entry); // if already existed, return the duplicate entry. if successful, return NULL
 sym_entry* find_sym_entry_frame(char* name);
 type_entry* find_type_entry(char* name);
 type_entry* add_type_entry(type_entry*);

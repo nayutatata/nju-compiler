@@ -1,3 +1,8 @@
+/*
+remaining 2 errors about structure:
+    1. var's redefinition in struct
+    2. assign exp in struct
+*/
 #include "semantic.h"
 #include "symboltable.h"
 #include <stdio.h>
@@ -66,9 +71,9 @@ void handle_extdef(Node *r){
 void handle_extdeclist(Node* r,sym_type* type){
     assert(r->ntype == _ExtDecList);
     if (r->ccnt == 1) {
-        handle_vardec(getchild(r, 0), type, 0);
+        handle_vardec(getchild(r, 0), type, 0,0);
     } else {
-        handle_vardec(getchild(r, 0),type,0);
+        handle_vardec(getchild(r, 0),type,0,0);
         handle_extdeclist(getchild(r, 2),type);
     }
 }
@@ -99,7 +104,9 @@ sym_type* handle_structspecifier(Node* r){
     }
     sym_entry* se = handle_opttag(getchild(r, 1));
     Node* deflist = getchild(r, 3);
-    field_node* flist = handle_deflist(deflist);
+    new_frame();
+    field_node* flist = handle_deflist(deflist,1);
+    pop_frame();
     sym_type* res = malloc(sizeof(sym_type));
     res->kind = SYM_STRUCT;
     res->struct_info = flist;
@@ -143,7 +150,7 @@ sym_type* handle_tag(Node* r){
         return new_empty_type(); // the type not found.
     }
 }
-field_node* handle_vardec(Node *r,sym_type* type,int dim){ // in fact this return-type is not good, the right one should be sym_type, but I can get it by return-val->type, haha
+field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in fact this return-type is not good, the right one should be sym_type, but I can get it by return-val->type, haha
     assert(r->ntype == _VarDec);
     if (r->ccnt == 1) {
         field_node* res = malloc(sizeof(field_node));
@@ -154,6 +161,10 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim){ // in fact this retur
             sym_entry* se = new_sym_entry(getchild(r, 0), type);
             sym_entry* detect = find_sym_entry_frame(se->name);
             if (detect){
+                if (is_struct){
+                    semantic_error(15, getchild(r, 0)->nline);
+                    return res;
+                }
                 semantic_error(3, getchild(r,0)->nline); // redefinition
                 return res; // I don't know whether it can work
             }
@@ -168,13 +179,17 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim){ // in fact this retur
         sym_entry* se = new_sym_entry(getchild(r, 0), array_type);
         sym_entry* detect = find_sym_entry_frame(se->name);
         if (detect) {
-            semantic_error(3, r->nline);  // redefinition
+            if (is_struct) {
+                semantic_error(15, getchild(r, 0)->nline);
+                return res;
+            }
+            semantic_error(3, getchild(r,0)->nline);  // redefinition
             return res;                   // I don't know whether it can work
         }
         add_sym_entry(se);
         return res;
     }
-    return handle_vardec(getchild(r, 0), type, dim + 1);
+    return handle_vardec(getchild(r, 0), type, dim + 1,is_struct);
 }
 sym_type* handle_funcdec(Node* r,sym_type* return_type){
     assert(r->ntype == _FunDec);
@@ -213,7 +228,7 @@ field_node* handle_paramdec(Node* r){
     Node* vardec = getchild(r, 1);
     Node* specifier = getchild(r, 0);
     sym_type* t = handle_specifier(specifier);
-    field_node* fn = handle_vardec(vardec, t, 0);
+    field_node* fn = handle_vardec(vardec, t, 0,0);
     return fn;
 }
 void handle_compst(Node* r,sym_type* func_type){
@@ -239,7 +254,7 @@ void handle_compst(Node* r,sym_type* func_type){
         new_frame();
     Node* deflist = getchild(r, 1);
     Node* stmtlist = getchild(r, 2);
-    handle_deflist(deflist);
+    handle_deflist(deflist,0);
     handle_stmtlist(stmtlist,func_type);
     pop_frame();
 }
@@ -289,42 +304,42 @@ void handle_stmt(Node* r, sym_type* func_type){          // if stmt is a return 
     assert(0);
 }
 // we should distinguish struct definition and common local definition. 
-field_node* handle_deflist(Node* r){ // in fact we need this to return something for struct definition
+field_node* handle_deflist(Node* r,int is_struct){ // in fact we need this to return something for struct definition
     if (!r)
         return NULL;
     assert(r->ntype == _DefList);
-    field_node* res = handle_def(getchild(r, 0));
+    field_node* res = handle_def(getchild(r, 0),is_struct);
     assert(res);
-    field_node* t = handle_deflist(getchild(r, 1));
+    field_node* t = handle_deflist(getchild(r, 1),is_struct);
     if (!t)
         return res;
     res->next = t;
     return res;
 }
-field_node* handle_def(Node* r){
+field_node* handle_def(Node* r,int is_struct){
     assert(r->ntype == _Def);
     Node *specifier = getchild(r, 0), *declist = getchild(r, 1);
     sym_type* type = handle_specifier(specifier);
-    field_node* res = handle_declist(declist, type);
+    field_node* res = handle_declist(declist, type,is_struct);
     return res;
 }
-field_node* handle_declist(Node* r,sym_type* type){
+field_node* handle_declist(Node* r,sym_type* type,int is_struct){
     assert(r->ntype == _DecList);
     Node* dec = getchild(r, 0);
-    field_node* res = handle_dec(dec, type);
+    field_node* res = handle_dec(dec, type,is_struct);
     assert(r);
     if (r->ccnt == 1){
         res->next = NULL;
         return res;
     }
     assert(res);
-    res->next = handle_declist(getchild(r, 2), type);
+    res->next = handle_declist(getchild(r, 2), type,is_struct);
     return res;
 }
-field_node* handle_dec(Node* r,sym_type* type){
+field_node* handle_dec(Node* r,sym_type* type,int is_struct){
     assert(r->ntype == _Dec);
     Node* vardec = getchild(r, 0);
-    field_node* fn = handle_vardec(vardec,type,0);
+    field_node* fn = handle_vardec(vardec,type,0,is_struct);
     if (r->ccnt==1)
         return fn;
     Node* exp = getchild(r,2);
@@ -432,11 +447,11 @@ sym_type* handle_exp(Node* r){
                 return new_empty_type();
             }
             if (se->type->kind!=SYM_FUNC){
-                semantic_error(11, child0->ntype);
+                semantic_error(11, child0->nline);
                 return new_empty_type();
             }
             if (se->type->func_info.num!=0){
-                semantic_error(9, child0->ntype);
+                semantic_error(9, child0->nline);
                 return se->type->func_info.return_type;
             }
             return se->type->func_info.return_type;
