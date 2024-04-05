@@ -112,7 +112,22 @@ sym_type* handle_structspecifier(Node* r){
     res->struct_info = flist;
     if (se) {
         se->type->type_info = res;
-        add_sym_entry(se);
+        sym_entry* detect = find_sym_entry(se->name);
+        if (detect){
+            semantic_error(3, r->nline);
+            return res;
+        }
+        //add_sym_entry(se);
+        // struct definition should be global
+        frame_t* now_frame = frame;
+        while (now_frame){
+            sym_entry* now_table = now_frame->symtable;
+            sym_entry* now_entry = malloc(sizeof(sym_entry));
+            memcpy(now_entry, se, sizeof(sym_entry)); // still a light copy, the type not fully copied.
+            now_entry->next = now_table->next;
+            now_table->next = now_entry;
+            now_frame = now_frame->next;
+        }
     }
     return res;
 }
@@ -168,6 +183,13 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
                 semantic_error(3, getchild(r,0)->nline); // redefinition
                 return res; // I don't know whether it can work
             }
+            else{
+                sym_entry* struct_name = find_sym_entry(se->name);
+                if (struct_name&&struct_name->type->kind==SYM_TYPE){
+                    semantic_error(3, getchild(r, 0)->nline);
+                    return res;
+                }
+            }
             add_sym_entry(se);// actually if it is a parameter, then it should not be added. some error here.
             return res;
         }
@@ -185,6 +207,12 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
             }
             semantic_error(3, getchild(r,0)->nline);  // redefinition
             return res;                   // I don't know whether it can work
+        } else { // if name of var conflicts with struct name.
+            sym_entry* struct_name = find_sym_entry(se->name);
+            if (struct_name && struct_name->type->kind == SYM_TYPE) {
+                semantic_error(3, getchild(r, 0)->nline);
+                return res;
+            }
         }
         add_sym_entry(se);
         return res;
@@ -313,7 +341,11 @@ field_node* handle_deflist(Node* r,int is_struct){ // in fact we need this to re
     field_node* t = handle_deflist(getchild(r, 1),is_struct);
     if (!t)
         return res;
-    res->next = t;
+    field_node* tail = res;
+    while (tail->next){
+        tail = tail->next;
+    }
+    tail->next = t;
     return res;
 }
 field_node* handle_def(Node* r,int is_struct){
@@ -343,6 +375,9 @@ field_node* handle_dec(Node* r,sym_type* type,int is_struct){
     if (r->ccnt==1)
         return fn;
     Node* exp = getchild(r,2);
+    if (is_struct){
+        semantic_error(15, vardec->nline);
+    }
     sym_type* exp_type = handle_exp(exp);
     if (!type_eq(exp_type,fn->type)){
         semantic_error(5, exp->nline);
