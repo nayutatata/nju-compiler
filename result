@@ -11,10 +11,10 @@
 [base/2021/A-19.cmm] AC
 [base/2021/A-2.cmm] AC
 [base/2021/A-20.cmm] AC
-[base/2021/A-3.cmm] WA: got ['3-17', '8-18', '13-18'], expect ['3-17']
+[base/2021/A-3.cmm] AC
 [base/2021/A-4.cmm] AC
 [base/2021/A-5.cmm] AC
-[base/2021/A-6.cmm] WA: got ['6-33', '7-33'], expect ['6-33']
+[base/2021/A-6.cmm] AC
 [base/2021/A-7.cmm] AC
 [base/2021/A-8.cmm] AC
 [base/2021/A-9.cmm] AC
@@ -22,12 +22,12 @@
 [base/2021/B-2.cmm] AC
 [base/2021/C-1.cmm] AC
 [base/2021/C-2.cmm] AC
-[base/2020/A-1.cmm] WA: got ['1-18', '8-18', '13-18'], expect ['1-18']
+[base/2020/A-1.cmm] AC
 [base/2020/A-10.cmm] AC
 [base/2020/A-11.cmm] AC
 [base/2020/A-12.cmm] AC
-[base/2020/A-13.cmm] WA: got ['5-11', '7-11', '10-11', '13-11'], expect ['13-11']
-[base/2020/A-14.cmm] WA: got ['12-30', '14-30'], expect ['14-30']
+[base/2020/A-13.cmm] AC
+[base/2020/A-14.cmm] AC
 [base/2020/A-15.cmm] AC
 [base/2020/A-16.cmm] AC
 [base/2020/A-17.cmm] AC
@@ -35,15 +35,15 @@
 [base/2020/A-19.cmm] AC
 [base/2020/A-2.cmm] AC
 [base/2020/A-20.cmm] AC
-[base/2020/A-3.cmm] WA: got ['3-5', '7-6', '13-6'], expect ['3-5']
+[base/2020/A-3.cmm] WA: got ['3-5', '13-6'], expect ['3-5']
 [base/2020/A-4.cmm] WA: got ['4-17', '9-30'], expect ['4-17']
 [base/2020/A-5.cmm] AC
-[base/2020/A-6.cmm] WA: got ['6-22', '7-22'], expect ['6-22']
+[base/2020/A-6.cmm] AC
 [base/2020/A-7.cmm] AC
 [base/2020/A-8.cmm] AC
 [base/2020/A-9.cmm] AC
 [base/2020/B-1.cmm] AC
-[base/2020/B-2.cmm] WA: got ['1-17', '7-17', '2-23', '5-23', '12-30', '6-50', '7-50', '9-83', '5-84', '10-84'], expect ['1-17', '8-19', '2-23', '12-30', '6-50', '9-83', '10-84']
+[base/2020/B-2.cmm] AC
 [base/2020/C-1.cmm] AC
 [base/2020/C-2.cmm] AC
 [base/2023/A-1.cmm] AC
@@ -73,13 +73,13 @@
 [extend/not1/2021/D-1.cmm] WA: got ['B-43', 'B-45', 'B-96', 'B-97', 'B-98'], expect ['B-43', 'B-96', 'B-97']
 [extend/not1/2020/D-1.cmm] WA: got ['B-1', 'B-2', 'B-10', 'B-12'], expect ['B-1', 'B-10']
 [extend/not1/2023/D-1.cmm] WA: got ['B-13', 'B-15', 'B-41', 'B-44', 'B-54'], expect ['B-13', 'B-41', 'B-54']
-[extend/2/2021/D-2.cmm] WA: got ['3-68'], expect []
-[extend/2/2021/E-2.cmm] WA: got ['3-68', '3-109', '1-119', '8-119'], expect ['3-109', '1-119']
-[extend/2/2020/D-2.cmm] WA: got ['3-16'], expect []
-[extend/2/2020/E2_2.cmm] WA: got ['3-14', '1-38', '7-38', '1-39', '7-39', '12-39', '1-40', '7-40', '3-55', '3-69'], expect ['1-38', '1-39', '1-40', '3-69']
-[extend/2/2023/D-2.cmm] WA: got ['3-68'], expect []
-[extend/2/2023/E-2.cmm] WA: got ['5-17', '10-17', '5-27', '7-27', '6-46'], expect ['10-17', '7-27', '6-46']
-[extend/not3/2021/D-3.cmm] WA: got ['7-30', '7-34', '7-40', '9-51'], expect ['9-51', '8-54']
+[extend/2/2021/D-2.cmm] AC
+[extend/2/2021/E-2.cmm] AC
+[extend/2/2020/D-2.cmm] AC
+[extend/2/2020/E2_2.cmm] AC
+[extend/2/2023/D-2.cmm] AC
+[extend/2/2023/E-2.cmm] AC
+[extend/not3/2021/D-3.cmm] AC
 [extend/not3/2020/D-3.cmm] AC
 [extend/not3/2023/D-3.cmm] AC
-PASSED 65/84
+PASSED 79/84
