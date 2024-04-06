@@ -34,8 +34,10 @@ static const char* print_table[] = {
     "redefinition of struct or complicts with var.",
     "unknown struct."
 };
+static int error_vis[2000];
 static void semantic_error(int idx, int line) {
-    printf("Error type %d at Line %d: %s\n", idx, line, print_table[idx]);
+    if (!error_vis[line])
+        error_vis[line]=1,printf("Error type %d at Line %d: %s\n", idx, line, print_table[idx]);
 }
 void semantic_analysis(Node* r){
     handle_program(r);
@@ -181,7 +183,8 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
                     return res;
                 }
                 semantic_error(3, getchild(r,0)->nline); // redefinition
-                return res; // I don't know whether it can work
+                //puts(show_info(res->type));
+                return res;  // I don't know whether it can work
             }
             else{
                 sym_entry* struct_name = find_sym_entry(se->name);
@@ -228,7 +231,7 @@ sym_type* handle_funcdec(Node* r,sym_type* return_type){
     t->func_info.return_type = return_type;
     if (detect) {
         semantic_error(4, id->nline);
-        return new_empty_type();
+        //return new_empty_type();
     }
     if (r->ccnt==3){
         t->func_info.param_types = NULL;
@@ -237,6 +240,7 @@ sym_type* handle_funcdec(Node* r,sym_type* return_type){
         add_sym_entry(se);
         return t;
     }
+    //new_frame();
     field_node* type_list = handle_varlist(getchild(r, 2));
     t->func_info.param_types = type_list;
     se = new_sym_entry(id, t);
@@ -324,9 +328,9 @@ void handle_stmt(Node* r, sym_type* func_type){          // if stmt is a return 
             semantic_error(7, exp->nline);
         }
         Node* stmt1 = getchild(r, 4);
-        handle_stmt(stmt1,NULL);
+        handle_stmt(stmt1,func_type);
         if (r->ccnt==7)
-            handle_stmt(getchild(r, 6), NULL);
+            handle_stmt(getchild(r, 6), func_type);
         return;
     }
     assert(0);
@@ -435,7 +439,7 @@ sym_type* handle_exp(Node* r){
                     lhs = 1;
                 if (!lhs){
                     semantic_error(6, child0->nline);
-                    return new_empty_type();
+                    //return new_empty_type();
                 }
                 if (!type_eq(exp_type0,exp_type2)){
                     semantic_error(5, child0->nline);
@@ -444,12 +448,21 @@ sym_type* handle_exp(Node* r){
             } else if (op->ntype == _AND || op->ntype == _OR) {
                 if (!can_logic(exp_type0)||!can_logic(exp_type2)){
                     semantic_error(7, child0->nline);
-                    return new_empty_type(); // I don't know whether it's right.
+                    sym_type* rest = malloc(sizeof(sym_type));
+                    rest->kind = SYM_BASIC;
+                    rest->basic_info = SYM_INT;
+                    return rest;  // I don't know whether it's right.
                 }
                 return exp_type0;
             } else if (!type_eq(exp_type0, exp_type2)) {
                 semantic_error(7, child0->nline);
-                return new_empty_type();
+                //return exp_type0;
+            }
+            if (op->ntype==_RELOP){
+                sym_type* rest = malloc(sizeof(sym_type));
+                rest->kind = SYM_BASIC;
+                rest->basic_info = SYM_INT;
+                return rest;
             }
             return exp_type0;
         }
@@ -458,8 +471,9 @@ sym_type* handle_exp(Node* r){
         }
         else if (child0->ntype==_Exp){ // struct
             sym_type* struct_type = handle_exp(child0);
-            if (struct_type->kind!=SYM_STRUCT){
+            if (struct_type->kind != SYM_STRUCT) {
                 semantic_error(13, child0->nline);
+                puts(show_info(struct_type));
                 return new_empty_type();
             }
             field_node* finder = struct_type->struct_info;

@@ -42,7 +42,8 @@ char* show_info(sym_type* type){
     }
     if (kind==SYM_STRUCT){
         field_node* fn = type->struct_info;
-        while (fn){
+        strcat(res, "STRUCT: ");
+        while (fn) {
             strcat(res, "name: ");
             strcat(res, fn->name);
             strcat(res, " ,type: ");
@@ -53,7 +54,10 @@ char* show_info(sym_type* type){
         return res;
     }
     if (kind==SYM_TYPE){
-        return show_info(type->type_info);
+        char* a = show_info(type->type_info);
+        strcat(res, "TYPE: ");
+        strcat(res, a);
+        return res;
     }
 }
 sym_entry* find_sym_entry(char* name) {
@@ -195,7 +199,7 @@ int type_eq(sym_type* t1,sym_type* t2){
         }
         return l1 == NULL && l2 == NULL;
     }
-    //assert(0);
+    return 1; // both empty
 }
 int can_logic(sym_type* t){
     assert(t);
