@@ -67,7 +67,7 @@ void handle_extdef(Node *r){
     } else if (child1->ntype == _FunDec) {
         sym_type* t = handle_funcdec(child1,type);
         assert(t);
-        handle_compst(getchild(r, 2), t);
+        handle_compst(getchild(r, 2), t,1);
     }
 }
 void handle_extdeclist(Node* r,sym_type* type){
@@ -238,13 +238,14 @@ sym_type* handle_funcdec(Node* r,sym_type* return_type){
         t->func_info.num = 0;
         se = new_sym_entry(id, t);
         add_sym_entry(se);
+        new_frame();
         return t;
     }
-    //new_frame();
-    field_node* type_list = handle_varlist(getchild(r, 2));
-    t->func_info.param_types = type_list;
     se = new_sym_entry(id, t);
     add_sym_entry(se);
+    new_frame();
+    field_node* type_list = handle_varlist(getchild(r, 2));
+    t->func_info.param_types = type_list;
     return t;
 }
 field_node* handle_varlist(Node* r){
@@ -263,12 +264,13 @@ field_node* handle_paramdec(Node* r){
     field_node* fn = handle_vardec(vardec, t, 0,0);
     return fn;
 }
-void handle_compst(Node* r,sym_type* func_type){
+void handle_compst(Node* r,sym_type* func_type,int func_first){
     assert(r->ntype == _CompSt);
     assert(func_type == NULL || func_type->kind == SYM_FUNC || func_type->kind == SYM_EMPTY); // compst may be follow a func definition.
     //new_frame(); // error here, if this is an func compst, I should add params into symtable.
     sym_entry* new_symtable = malloc(sizeof(sym_entry));
     new_symtable->next = NULL;
+    /*
     if (func_type!=NULL&&func_type->kind == SYM_FUNC) {
         field_node* fn = func_type->func_info.param_types;
         while (fn){
@@ -282,7 +284,8 @@ void handle_compst(Node* r,sym_type* func_type){
         new_frame();
         frame->symtable = new_symtable;
         symtable = new_symtable;
-    } else
+    }*/
+    if (!func_first)
         new_frame();
     Node* deflist = getchild(r, 1);
     Node* stmtlist = getchild(r, 2);
@@ -303,7 +306,7 @@ void handle_stmt(Node* r, sym_type* func_type){          // if stmt is a return 
     assert(r->ntype == _Stmt);
     if (r->ccnt==1){
         Node* compst = getchild(r, 0);
-        handle_compst(compst,func_type);
+        handle_compst(compst,func_type,0);
         return;
     }
     if (r->ccnt==2){

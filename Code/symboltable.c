@@ -161,7 +161,9 @@ void new_frame(){
     symtable = new_frame->symtable;
 }
 void pop_frame(){
+    assert(frame);
     frame = frame->next;
+    assert(frame);
     symtable = frame->symtable;
 }
 int type_eq(sym_type* t1,sym_type* t2){

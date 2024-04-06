@@ -18,7 +18,7 @@ field_node* handle_vardec(Node *r,sym_type* var_type,int dim,int is_struct);
 sym_type* handle_funcdec(Node *r,sym_type* return_type);
 field_node* handle_varlist(Node *r);
 field_node* handle_paramdec(Node *r);
-void handle_compst(Node *r, sym_type* func_type);
+void handle_compst(Node *r, sym_type* func_type,int func_first);
 void handle_stmtlist(Node *r, sym_type* func_type);
 void handle_stmt(Node *r, sym_type* func_type);
 field_node* handle_deflist(Node *r,int is_struct);
