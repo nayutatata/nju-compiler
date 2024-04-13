@@ -60,6 +60,51 @@ char* show_info(sym_type* type){
         return res;
     }
 }
+static void add_read(){
+    sym_type* func_type = new_empty_type();
+    sym_type* return_type = new_empty_type();
+    return_type->kind = SYM_BASIC;
+    return_type->basic_info = SYM_INT;
+
+    func_type->kind = SYM_FUNC;
+    func_type->func_info.num = 0;
+    func_type->func_info.return_type = return_type;
+    func_type->func_info.param_types = NULL;
+
+    sym_entry* se = malloc(sizeof(sym_entry));
+    strcpy(se->name, "read");
+    se->type = func_type;
+    se->next = NULL;
+    add_sym_entry(se);
+}
+static void add_write(){
+    sym_type* func_type = new_empty_type();
+    sym_type* return_type = new_empty_type();
+    field_node* fn = malloc(sizeof(field_node));
+    fn->type = new_empty_type();
+
+    return_type->kind = SYM_BASIC;
+    return_type->basic_info = SYM_INT;
+
+    fn->next = NULL;
+    strcpy(fn->name, "output");
+    memcpy(fn->type, return_type, sizeof(sym_type));
+
+    func_type->kind = SYM_FUNC;
+    func_type->func_info.num = 1;
+    func_type->func_info.return_type = return_type;
+    func_type->func_info.param_types = fn;
+
+    sym_entry* se = malloc(sizeof(sym_entry));
+    strcpy(se->name, "write");
+    se->type = func_type;
+    se->next = NULL;
+    add_sym_entry(se);
+}
+void add_other(){
+    add_read();
+    add_write();
+}
 sym_entry* find_sym_entry(char* name) {
     assert(name != NULL);
     frame_t* now_frame = frame;
@@ -153,6 +198,7 @@ sym_type* new_empty_type(){
     return res;
 }
 void new_frame(){
+    return;
     frame_t* new_frame = malloc(sizeof(frame_t));
     new_frame->symtable = malloc(sizeof(sym_entry)); // dummy node
     new_frame->symtable->next = NULL;
@@ -161,6 +207,7 @@ void new_frame(){
     symtable = new_frame->symtable;
 }
 void pop_frame(){
+    return;
     assert(frame);
     frame = frame->next;
     assert(frame);
