@@ -42,6 +42,10 @@ operator_kind;
 typedef struct operand_t {
     char name[20];      // name of opearand
     operand_kind kind;
+    int imm_v;
+    float imm_fv;
+    int is_arr;
+    int is_arg;
 } operand_t;
 typedef struct operator_t{
     char name[20];      // name of operator
@@ -86,5 +90,7 @@ void tr_dec(Node* root);
 code_entry* tr_exp(Node* root);
 void tr_args(Node* root);
 void tr_cond(Node* root, operand_t true_label, operand_t false_label);
-
+operand_t get_addr(Node* root, int dim);
+code_entry* process_assign(operand_t a, operand_t b);
+operand_t to_value(operand_t ope);
 #endif

@@ -1,85 +1,84 @@
-[base/2021/A-1.cmm] AC
-[base/2021/A-10.cmm] AC
-[base/2021/A-11.cmm] AC
-[base/2021/A-12.cmm] AC
-[base/2021/A-13.cmm] AC
-[base/2021/A-14.cmm] AC
-[base/2021/A-15.cmm] AC
-[base/2021/A-16.cmm] AC
-[base/2021/A-17.cmm] AC
-[base/2021/A-18.cmm] AC
-[base/2021/A-19.cmm] AC
-[base/2021/A-2.cmm] AC
-[base/2021/A-20.cmm] AC
-[base/2021/A-3.cmm] AC
-[base/2021/A-4.cmm] AC
-[base/2021/A-5.cmm] AC
-[base/2021/A-6.cmm] AC
-[base/2021/A-7.cmm] AC
-[base/2021/A-8.cmm] AC
-[base/2021/A-9.cmm] AC
-[base/2021/B-1.cmm] AC
-[base/2021/B-2.cmm] AC
-[base/2021/C-1.cmm] AC
-[base/2021/C-2.cmm] AC
-[base/2020/A-1.cmm] AC
-[base/2020/A-10.cmm] AC
-[base/2020/A-11.cmm] AC
-[base/2020/A-12.cmm] AC
-[base/2020/A-13.cmm] AC
-[base/2020/A-14.cmm] AC
-[base/2020/A-15.cmm] AC
-[base/2020/A-16.cmm] AC
-[base/2020/A-17.cmm] AC
-[base/2020/A-18.cmm] AC
-[base/2020/A-19.cmm] AC
-[base/2020/A-2.cmm] AC
-[base/2020/A-20.cmm] AC
-[base/2020/A-3.cmm] WA: got ['3-5', '13-6'], expect ['3-5']
-[base/2020/A-4.cmm] WA: got ['4-17', '9-30'], expect ['4-17']
-[base/2020/A-5.cmm] AC
-[base/2020/A-6.cmm] AC
-[base/2020/A-7.cmm] AC
-[base/2020/A-8.cmm] AC
-[base/2020/A-9.cmm] AC
-[base/2020/B-1.cmm] AC
-[base/2020/B-2.cmm] AC
-[base/2020/C-1.cmm] AC
-[base/2020/C-2.cmm] AC
-[base/2023/A-1.cmm] AC
-[base/2023/A-10.cmm] AC
-[base/2023/A-11.cmm] AC
-[base/2023/A-12.cmm] AC
-[base/2023/A-13.cmm] AC
-[base/2023/A-14.cmm] AC
-[base/2023/A-15.cmm] AC
-[base/2023/A-16.cmm] AC
-[base/2023/A-17.cmm] AC
-[base/2023/A-18.cmm] AC
-[base/2023/A-19.cmm] AC
-[base/2023/A-2.cmm] AC
-[base/2023/A-20.cmm] AC
-[base/2023/A-3.cmm] AC
-[base/2023/A-4.cmm] AC
-[base/2023/A-5.cmm] AC
-[base/2023/A-6.cmm] AC
-[base/2023/A-7.cmm] AC
-[base/2023/A-8.cmm] AC
-[base/2023/A-9.cmm] AC
-[base/2023/B-1.cmm] AC
-[base/2023/B-2.cmm] AC
-[base/2023/C-1.cmm] AC
-[base/2023/C-2.cmm] AC
-[extend/not1/2021/D-1.cmm] WA: got ['B-43', 'B-45', 'B-96', 'B-97', 'B-98'], expect ['B-43', 'B-96', 'B-97']
-[extend/not1/2020/D-1.cmm] WA: got ['B-1', 'B-2', 'B-10', 'B-12'], expect ['B-1', 'B-10']
-[extend/not1/2023/D-1.cmm] WA: got ['B-13', 'B-15', 'B-41', 'B-44', 'B-54'], expect ['B-13', 'B-41', 'B-54']
-[extend/2/2021/D-2.cmm] AC
-[extend/2/2021/E-2.cmm] AC
-[extend/2/2020/D-2.cmm] AC
-[extend/2/2020/E2_2.cmm] AC
-[extend/2/2023/D-2.cmm] AC
-[extend/2/2023/E-2.cmm] AC
-[extend/not3/2021/D-3.cmm] AC
-[extend/not3/2020/D-3.cmm] AC
-[extend/not3/2023/D-3.cmm] AC
-PASSED 79/84
+Making(Updating) irsim
+make: Entering directory '/home/compiler/OJ/nju-compiler-test/lab3/irsim'
+make: 'build/irsim' is up to date.
+make: Leaving directory '/home/compiler/OJ/nju-compiler-test/lab3/irsim'
+sample test [naive.cmm] matched (5 inst)
+sample test [sample1.cmm] matched (32 inst)
+sample test [sample2.cmm] matched (75 inst)
+normal1 test [2018-A-1.cmm] matched (22 inst)
+normal1 test [2018-A-2.cmm] matched (90 inst)
+normal1 test [2018-A-3.cmm] matched (4755 inst)
+normal1 test [2018-A-4.cmm] matched (737 inst)
+normal1 test [2018-A-5.cmm] matched (282 inst)
+normal1 test [2018-B-1.cmm] matched (116 inst)
+normal1 test [2018-B-2.cmm] matched (99 inst)
+normal1 test [2018-B-3.cmm] matched (5061 inst)
+normal1 test [2018-C-1.cmm] matched (63613 inst)
+normal1 test [2018-C-2.cmm] matched (1866 inst)
+normal1 test [2018-D-1.cmm] matched (58424 inst)
+normal2 test [2020-A_1.cmm] matched (30 inst)
+normal2 test [2020-A_2.cmm] matched (183 inst)
+normal2 test [2020-A_3.cmm] matched (165 inst)
+normal2 test [2020-A_4.cmm] matched (656 inst)
+normal2 test [2020-A_5.cmm] matched (131 inst)
+normal2 test [2020-B_1.cmm] matched (102 inst)
+normal2 test [2020-B_2.cmm] matched (1368 inst)
+normal2 test [2020-B_3.cmm] matched (6507 inst)
+normal2 test [2020-C_1.cmm] matched (662 inst)
+[1m[91mWrong on input [2020]
+Output mismatch! expected 10, found 11 at line 2[0m[0m
+[0;31m[1m normal2 test [2020-C_2.cmm] mismatch or TLE [0m(B[m
+normal2 test [2020-D_1.cmm] matched (119660 inst)
+normal3 test [A-1.cmm] matched (36 inst)
+normal3 test [A-2.cmm] matched (227 inst)
+normal3 test [A-3.cmm] matched (360 inst)
+normal3 test [A-4.cmm] matched (2377 inst)
+normal3 test [A-5.cmm] matched (230 inst)
+normal3 test [B-1.cmm] matched (479 inst)
+normal3 test [B-2.cmm] matched (26065 inst)
+normal3 test [B-3.cmm] matched (1069 inst)
+normal3 test [C-1.cmm] matched (3280 inst)
+normal3 test [C-2.cmm] matched (7780 inst)
+normal3 test [D-1.cmm] matched (954323 inst)
+normal4 test [A-1.cmm] matched (32 inst)
+normal4 test [A-2.cmm] matched (52 inst)
+parser: ir.c:677: process_assign: Assertion `0' failed.
+timeout: the monitored command dumped core
+[0;31m[1m normal4 test [A-3.cmm] RE or TLE [0m(B[m
+[1m[91mWrong on input [-10, -100, 12, 33, 5]
+Output mismatch!(you output more than supposed?)[0m[0m
+[0;31m[1m normal4 test [A-3.cmm] mismatch or TLE [0m(B[m
+normal4 test [A-4.cmm] matched (150 inst)
+normal4 test [A-5.cmm] matched (376 inst)
+normal4 test [B-1.cmm] matched (334 inst)
+normal4 test [B-2.cmm] matched (269 inst)
+normal4 test [B-3.cmm] matched (2042 inst)
+normal4 test [C-1.cmm] matched (8953 inst)
+normal4 test [C-2.cmm] matched (662 inst)
+handmade test [m0.cmm] matched (326 inst)
+handmade test [m1.cmm] matched (6 inst)
+handmade test [m2.cmm] matched (45 inst)
+handmade test [yzy10.cmm] matched (284 inst)
+handmade test [yzy12.cmm] matched (60 inst)
+[1m[91mWrong on input [0, 0]
+Output mismatch! expected 0, found 1 at line 1[0m[0m
+[0;31m[1m handmade test [yzy13.cmm] mismatch or TLE [0m(B[m
+handmade test [yzy15.cmm] matched (10 inst)
+handmade test [yzy16.cmm] matched (14 inst)
+handmade test [yzy17.cmm] matched (52 inst)
+handmade test [yzy19.cmm] matched (99 inst)
+handmade test [yzy1.cmm] matched (71 inst)
+handmade test [yzy3.cmm] matched (45 inst)
+handmade test [yzy4.cmm] matched (59 inst)
+handmade test [yzy5.cmm] matched (111 inst)
+handmade test [yzy6.cmm] matched (13 inst)
+handmade test [yzy7.cmm] matched (12 inst)
+handmade test [yzy8.cmm] matched (17 inst)
+handmade test [yzy9.cmm] matched (68 inst)
+handmade test [ZZ0.cmm] matched (0 inst)
+[1m[91mWrong on input []
+Output mismatch! expected -4, found 0 at line 1[0m[0m
+[0;31m[1m handmade test [zzw-2.cmm] mismatch or TLE [0m(B[m
+handmade test [zzw-3.cmm] matched (31 inst)
+PASSED 63/67
+irsim executes about 1275060 instructions

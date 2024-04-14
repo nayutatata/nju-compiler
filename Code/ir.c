@@ -44,7 +44,7 @@ static void print_entry(code_entry* ce,FILE* file) {
     else if (opk == OP_RETURN) {
         fprintf(file, "RETURN %s", ce->arg1.name);
     } else if (opk == OP_DEC) {
-        fprintf(file, "DEC %s [%s]", ce->arg1.name, ce->arg2.name);
+        fprintf(file, "DEC %s %s", ce->arg1.name, ce->arg2.name);
     } else if (opk == OP_ARG) {
         fprintf(file, "ARG %s", ce->arg1.name);
     } else if (opk == OP_CALL) {
@@ -91,6 +91,7 @@ operand_t* new_imm(int val){
     operand_t* res = malloc(sizeof(operand_t));
     res->kind = OPE_IMM;
     sprintf(res->name, "#%d", val);
+    res->imm_v = val;
     return res;
 }
 void print_code_list(FILE* file){
@@ -147,7 +148,8 @@ operand_t* tr_vardec(Node* root,int size){
             ce->arg1.kind = OPE_VAR;
             ce->arg2.kind = OPE_IMM;
             strcpy(ce->arg1.name, se->name);
-            sprintf(ce->arg2.name, "#%d", size);
+            sprintf(ce->arg2.name, "%d", size*4);
+            ce->arg2.imm_v = size * 4;
             add_code(ce);
             return res;
         }
@@ -207,7 +209,7 @@ void tr_stmt(Node* root){
         code_entry* ce_exp = tr_exp(exp);
         code_entry* res = new_ce();
         res->op.kind = OP_RETURN;
-        res->arg1 = ce_exp->result;
+        res->arg1 = to_value(ce_exp->result);
         add_code(res);
     }
     else{
@@ -287,11 +289,7 @@ void tr_dec(Node* root){
         return;
     Node* exp = getchild(root, 2);
     code_entry* ce_exp = tr_exp(exp);
-    code_entry* ce = new_ce();
-    ce->op.kind = OP_ASSIGN;
-    ce->result = ce->arg1 = *ope;
-    ce->arg2 = ce_exp->result;
-    add_code(ce);
+    code_entry* ce = process_assign(*ope, ce_exp->result);
 }
 code_entry* tr_exp(Node* root){
     code_entry* res = new_ce();
@@ -306,10 +304,11 @@ code_entry* tr_exp(Node* root){
         else if (child->ntype==_INT){
             res->result.kind = OPE_IMM;
             sprintf(res->result.name, "#%d", child->val.intv);
-        }
-        else if (child->ntype==_FLOAT){
+            res->result.imm_v = child->val.intv;
+        } else if (child->ntype == _FLOAT) {
             res->result.kind = OPE_IMM;
             sprintf(res->result.name, "#%f", child->val.floatv);
+            res->result.imm_fv = child->val.floatv;
         }
         return res;
     } else if (root->ccnt == 2) {  // NOT,MINUS
@@ -321,18 +320,18 @@ code_entry* tr_exp(Node* root){
             res->op.kind = OP_MINUS;
             res->arg1.kind = OPE_IMM;
             sprintf(res->arg1.name, "#0");
-            res->arg2 = ce_exp->result;
+            res->arg2 = to_value(ce_exp->result);
             res->result = *exp_res;
-        }
-        else if (op->ntype==_NOT){
-            
+            add_code(res);
+        } else if (op->ntype == _NOT) {
+            TODO;
         }
     } else if (root->ccnt == 3) {
         Node *c0 = getchild(root, 0), *c1 = getchild(root, 1), *c2 = getchild(root, 2);
         if (c0->ntype==_LP){// (exp)
-            return tr_exp(c1);
-        }
-        else if (c1->ntype==_LP){// f()
+            res = tr_exp(c1);
+            add_code(res);
+        } else if (c1->ntype == _LP) {  // f()
             operand_t* t = new_temp();
             sym_entry* se = find_sym_entry(c0->val.name);
             assert(se);
@@ -346,12 +345,12 @@ code_entry* tr_exp(Node* root){
                 res->op.kind = OP_READ;
                 res->result = *t;
             }
-        }
-        else if(c1->ntype==_DOT){
+            add_code(res);
+        } else if (c1->ntype == _DOT) {
             assert(0); // should not appear
         }
         // following is 2-op exp
-        else{
+        else {
             operand_t* t = new_temp();
             code_entry *ce0 = tr_exp(c0), *ce2 = tr_exp(c2);
             res->arg1 = ce0->result;
@@ -360,31 +359,63 @@ code_entry* tr_exp(Node* root){
             switch (c1->ntype)
             {
             case _ASSIGNOP:
-                res->op.kind = OP_ASSIGN;
-                break;
+                res = process_assign(res->arg1, res->arg2);
+                return res;
             case _AND:
-                TODO;
-                break;
             case _OR:
-                TODO;
-                break;
             case _RELOP:
-                TODO;
+            case _NOT:{
+                operand_t *label1 = new_label(), *label2 = new_label();
+                code_entry* res1 = new_ce();
+                res1->op.kind = OP_ASSIGN;
+                res1->arg1 = res->result;
+                res1->arg2 = *(new_imm(0));
+                res1->result = res->result;
+                add_code(res1);
+
+                tr_cond(root, *label1, *label2);
+
+                code_entry* res2 = new_ce();
+                res2->op.kind = OP_LABELDEC;
+                res2->arg1 = *label1;
+                add_code(res2);
+
+                code_entry* res3 = new_ce();
+                res3->op.kind = OP_ASSIGN;
+                res3->arg1 = res->result;
+                res3->arg2 = *(new_imm(1));
+                res3->result = res->result;
+                add_code(res3);
+
+                code_entry* res4 = new_ce();
+                res4->op.kind = OP_LABELDEC;
+                res4->arg1 = *label2;
+                add_code(res4);
                 break;
+            }
             case _PLUS:
                 res->op.kind = OP_PLUS;
+                res->arg1 = to_value(res->arg1);
+                res->arg2 = to_value(res->arg2);
+                add_code(res);
                 break;
             case _MINUS:
                 res->op.kind = OP_MINUS;
+                res->arg1 = to_value(res->arg1);
+                res->arg2 = to_value(res->arg2);
+                add_code(res);
                 break;
             case _STAR:
                 res->op.kind = OP_MUL;
+                res->arg1 = to_value(res->arg1);
+                res->arg2 = to_value(res->arg2);
+                add_code(res);
                 break;
             case _DIV:
                 res->op.kind = OP_DIV;
-                break;
-            case _NOT:
-                TODO;
+                res->arg1 = to_value(res->arg1);
+                res->arg2 = to_value(res->arg2);
+                add_code(res);
                 break;
             default:
                 assert(0);
@@ -408,36 +439,71 @@ code_entry* tr_exp(Node* root){
                 res->op.kind = OP_WRITE;
                 Node* exp = getchild(c2, 0);
                 code_entry* ce = tr_exp(exp);
-                res->arg1 = ce->result;
+                res->arg1 = to_value(ce->result);
                 res->result = *t;
             }
-        }
-        else if (c0->ntype==_Exp){ //array
-            // one-dimension
-
-            res->op.kind = OP_STAR;
-            res->result = *(new_temp());
-            //res->arg1 = final_addr->result;
+            add_code(res);
+        } else if (c0->ntype == _Exp) {  // array
+            // only return a address
+            operand_t addr = get_addr(root,0);
+            res->op.kind = OP_NULL;
+            res->result = addr;
+            res->result.is_arr = 1; // is an array address.
         }
     }
-    add_code(res);
     return res;
 }
 void tr_args(Node* root){
-    Node* exp = getchild(root,0);
-    code_entry* ce_exp = tr_exp(exp);
-    code_entry* res = new_ce();
-    res->op.kind = OP_ARG;
-    res->arg1 = ce_exp->result;
-    add_code(res);
-    if (root->ccnt==1)
-        return;
-    Node* args = getchild(root, 2);
-    tr_args(args);
+    if (root->ccnt==1){
+        Node* exp = getchild(root, 0);
+        code_entry* ce_exp = tr_exp(exp);
+        sym_entry* se = find_sym_entry(ce_exp->result.name);
+        code_entry* res = new_ce();
+        if (!se || se->type->kind != SYM_ARRAY) {
+            res->op.kind = OP_ARG;
+            res->arg1 = to_value(ce_exp->result);
+            add_code(res);
+        } else { // array name
+            code_entry* t = new_ce();
+            t->op.kind = OP_ADDR;
+            t->arg1 = ce_exp->result;
+            t->result = *(new_temp());
+            add_code(t);
+
+            res->op.kind = OP_ARG;
+            res->arg1 = t->result;
+            t->result.is_arg = 1;
+            add_code(res);
+        }
+    }
+    else{
+        Node* args = getchild(root, 2);
+        tr_args(args);
+        Node* exp = getchild(root, 0);
+        code_entry* ce_exp = tr_exp(exp);
+        sym_entry* se = find_sym_entry(ce_exp->result.name);
+        code_entry* res = new_ce();
+        if (!se || se->type->kind != SYM_ARRAY) {
+            res->op.kind = OP_ARG;
+            res->arg1 = to_value(ce_exp->result);
+            add_code(res);
+        } else {
+            code_entry* t = new_ce();
+            t->op.kind = OP_ADDR;
+            t->arg1 = ce_exp->result;
+            t->result = *(new_temp());
+            add_code(t);
+
+            res->op.kind = OP_ARG;
+            res->arg1 = t->result;
+            t->result.is_arg = 1;
+            add_code(res);
+        }
+    }
 }
 void tr_cond(Node* root,operand_t true_label,operand_t false_label){
     int cnt = root->ccnt;
-    if (cnt==2){
+    if (cnt==2){ // NOT
         Node* not = getchild(root, 0), *exp = getchild(root, 1);
         if (not->ntype==_NOT&&exp->ntype==_Exp){
             tr_cond(exp, false_label, true_label);
@@ -470,8 +536,8 @@ void tr_cond(Node* root,operand_t true_label,operand_t false_label){
             code_entry *ce1 = tr_exp(exp1), *ce2 = tr_exp(exp2);
             code_entry* res = new_ce();
             res->op.kind = OP_IF_GOTO;
-            res->arg1 = ce1->result;
-            res->arg2 = ce2->result;
+            res->arg1 = to_value(ce1->result);
+            res->arg2 = to_value(ce2->result);
             // res->op.name
             strcpy(res->gotoop.name, relop_table[op->val.opv]);
             res->result = true_label;
@@ -488,7 +554,7 @@ void tr_cond(Node* root,operand_t true_label,operand_t false_label){
     res->op.kind = OP_IF_GOTO;
     // res->op.name
     strcpy(res->gotoop.name, relop_table[NE]);
-    res->arg1 = ce_exp->result;
+    res->arg1 = to_value(ce_exp->result);
     res->arg2 = *(new_imm(0));
     res->result = true_label;
     add_code(res);
@@ -497,32 +563,135 @@ void tr_cond(Node* root,operand_t true_label,operand_t false_label){
     res2->result = false_label;
     add_code(res2);
 }
-code_entry* get_addr(Node* root){
-    Node* array = getchild(root, 0);
-    Node* id = getchild(array, 0);
-    Node* exp = getchild(root, 2);
-    sym_entry* se = find_sym_entry(id->val.name);
+operand_t get_addr(Node* root,int dim){
+    static operand_t offlist[40];
+    int cnt = root->ccnt;
+    if (cnt==1){
+        Node* id = getchild(root, 0);
+        sym_entry* se = find_sym_entry(id->val.name);
 
-    code_entry* exp_ce = tr_exp(exp);  // offset
+        operand_t offset = *(new_temp());
+        code_entry* t = new_ce();
+        t->op.kind = OP_ASSIGN;
+        t->result = offset;
+        t->arg1 = offset;
+        t->arg2 = *(new_imm(0));
+        add_code(t);
 
-    code_entry* addr = new_ce();
-    addr->op.kind = OP_ADDR;
-    addr->arg1.kind = OPE_VAR;
-    strcpy(addr->arg1.name, se->name);
-    addr->result = *(new_temp());
-    add_code(addr);
+        assert(se->type->array_info.num == dim);
+        operand_t base = *(new_temp());
 
-    code_entry* elem_addr = new_ce();
-    elem_addr->op.kind = OP_MUL;
-    elem_addr->arg1 = *(new_imm(4));
-    elem_addr->arg2 = exp_ce->result;
-    elem_addr->result = *(new_temp());
-    add_code(elem_addr);
+        t = new_ce();
+        t->op.kind = OP_ASSIGN;
+        t->result = base;
+        t->arg1 = base;
+        t->arg2 = *(new_imm(4));
+        add_code(t);
 
-    code_entry* final_addr = new_ce();
-    final_addr->op.kind = OP_PLUS;
-    final_addr->arg1 = addr->result;
-    final_addr->arg2 = elem_addr->result;
-    final_addr->result = *(new_temp());
-    add_code(final_addr);
+        for (int i = 0; i < dim; i++) {
+            operand_t a = offlist[i];
+            int b = se->type->array_info.size[dim - i - 1];
+            code_entry* temp = new_ce();
+            temp->op.kind = OP_MUL;
+            temp->arg1 = a;
+            temp->arg2 = base;
+            temp->result = *(new_temp());
+            add_code(temp);
+
+            code_entry* temp1 = new_ce();
+            temp1->op.kind = OP_PLUS;
+            temp1->arg1 = offset;
+            temp1->arg2 = temp->result;
+            temp1->result = offset;
+            add_code(temp1);
+
+            code_entry* temp2 = new_ce();
+            temp2->op.kind = OP_MUL;
+            temp2->arg1 = base;
+            temp2->arg2 = *(new_imm(b));
+            temp2->result = base;
+            add_code(temp2);
+        }
+        // something wrong. when array is arguement, should not addr it.
+        code_entry* res1 = new_ce();
+        res1->op.kind = OP_ADDR;
+        res1->arg1.kind = OPE_VAR;
+        res1->result = *(new_temp());
+        strcpy(res1->arg1.name, se->name);
+        add_code(res1);
+
+        code_entry* res2 = new_ce();
+        res2->op.kind = OP_PLUS;
+        res2->arg1 = res1->result;
+        res2->arg2 = offset;
+        res2->result = *(new_temp());
+        add_code(res2);
+
+        return res2->result;
+    }
+    /*
+    exp
+    exp [1]
+    exp [2] [1]
+    id [2] [1]
+    */
+    Node *exp1 = getchild(root, 0), *exp2 = getchild(root, 2);
+    code_entry* ce_exp2 = tr_exp(exp2);
+    offlist[dim] = ce_exp2->result;
+    return get_addr(exp1, dim + 1);
+}
+code_entry* process_assign(operand_t a,operand_t b){
+    if (a.is_arr&&b.is_arr){
+        code_entry* res1 = new_ce();
+        res1->op.kind = OP_STAR;
+        res1->arg1 = b;
+        res1->result = *(new_temp());
+        add_code(res1);
+
+        code_entry* res2 = new_ce();
+        res2->op.kind = OP_TOSTAR;
+        res2->arg1 = res1->result;
+        res2->result = a;
+        add_code(res2);
+        return res2;
+    }
+    if (a.is_arr&&!b.is_arr){
+        code_entry* res = new_ce();
+        res->op.kind = OP_TOSTAR;
+        res->arg1 = b;
+        res->result = a;
+        add_code(res);
+        return res;
+    }
+    if (!a.is_arr&&b.is_arr){
+        code_entry* res = new_ce();
+        res->op.kind = OP_STAR;
+        res->arg1 = b;
+        res->result = a;
+        add_code(res);
+        return res;
+    }
+    sym_entry* se1 = find_sym_entry(a.name);
+    sym_entry* se2 = find_sym_entry(b.name);
+    if (se1!=NULL&&se2!=NULL&&se1->type->kind==SYM_ARRAY&&se2->type->kind==SYM_ARRAY){
+        TODO;
+    }
+    code_entry* res = new_ce();
+    res->op.kind = OP_ASSIGN;
+    res->arg1 = a;
+    res->arg2 = b;
+    res->result = a;
+    add_code(res);
+    return res;
+}
+operand_t to_value(operand_t ope){
+    if (ope.is_arr){
+        code_entry* ce = new_ce();
+        ce->op.kind = OP_STAR;
+        ce->arg1 = ope;
+        ce->result = *(new_temp());
+        add_code(ce);
+        return ce->result;
+    }
+    return ope;
 }
