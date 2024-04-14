@@ -24,6 +24,8 @@ typedef struct sym_type {
         struct {
             int num; // dimensions
             struct sym_type *type;
+            struct sym_type *child_type;
+            int size[40];
         } array_info;
         enum
         {
