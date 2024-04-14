@@ -167,7 +167,7 @@ sym_type* handle_tag(Node* r){
         return new_empty_type(); // the type not found.
     }
 }
-field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in fact this return-type is not good, the right one should be sym_type, but I can get it by return-val->type, haha
+field_node* handle_vardec(Node* r, sym_type* type, int dim, int is_struct) {  // in fact this return-type is not good, the right one should be sym_type, but I can get it by return-val->type, haha
     assert(r->ntype == _VarDec);
     static int size[40];
     if (r->ccnt == 1) {
@@ -178,30 +178,29 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
             res->type = type;
             sym_entry* se = new_sym_entry(getchild(r, 0), type);
             sym_entry* detect = find_sym_entry_frame(se->name);
-            if (detect){
-                if (is_struct){
+            if (detect) {
+                if (is_struct) {
                     semantic_error(15, getchild(r, 0)->nline);
                     return res;
                 }
-                semantic_error(3, getchild(r,0)->nline); // redefinition
-                //puts(show_info(res->type));
+                semantic_error(3, getchild(r, 0)->nline);  // redefinition
+                // puts(show_info(res->type));
                 return res;  // I don't know whether it can work
-            }
-            else{
+            } else {
                 sym_entry* struct_name = find_sym_entry(se->name);
-                if (struct_name&&struct_name->type->kind==SYM_TYPE){
+                if (struct_name && struct_name->type->kind == SYM_TYPE) {
                     semantic_error(3, getchild(r, 0)->nline);
                     return res;
                 }
             }
-            add_sym_entry(se);// actually if it is a parameter, then it should not be added. some error here.
+            add_sym_entry(se);  // actually if it is a parameter, then it should not be added. some error here.
             return res;
         }
         sym_type* array_type = malloc(sizeof(sym_type));
         array_type->kind = SYM_ARRAY;
         array_type->array_info.num = dim;
         array_type->array_info.type = type;
-        for (int i = 0; i < dim;i++){
+        for (int i = 0; i < dim; i++) {
             array_type->array_info.size[i] = size[dim - 1 - i];
         }
         res->type = array_type;
@@ -212,9 +211,9 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
                 semantic_error(15, getchild(r, 0)->nline);
                 return res;
             }
-            semantic_error(3, getchild(r,0)->nline);  // redefinition
-            return res;                   // I don't know whether it can work
-        } else { // if name of var conflicts with struct name.
+            semantic_error(3, getchild(r, 0)->nline);  // redefinition
+            return res;                                // I don't know whether it can work
+        } else {                                       // if name of var conflicts with struct name.
             sym_entry* struct_name = find_sym_entry(se->name);
             if (struct_name && struct_name->type->kind == SYM_TYPE) {
                 semantic_error(3, getchild(r, 0)->nline);
@@ -224,9 +223,26 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
         add_sym_entry(se);
         return res;
     }
+    /*
+    int a[10][20];
+    vardec
+    vardec [20]
+    vardec [10]
+    id [10] [20]
+    */
+    sym_type* now_type = type;
+    if (dim != 0) {
+        now_type = malloc(sizeof(sym_type));
+        now_type->kind = SYM_ARRAY;
+        now_type->array_info.type = type;
+        now_type->array_info.num = dim;
+        for (int i = 0; i < dim; i++) {
+            now_type->array_info.size[i] = size[dim - i - 1];
+        }
+    }
     Node* int_imm = getchild(r, 2);
     size[dim] = int_imm->val.intv;
-    return handle_vardec(getchild(r, 0), type, dim + 1, is_struct);
+    return handle_vardec(getchild(r, 0), now_type, dim + 1, is_struct);
 }
 sym_type* handle_funcdec(Node* r,sym_type* return_type){
     assert(r->ntype == _FunDec);

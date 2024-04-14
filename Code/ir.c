@@ -417,7 +417,7 @@ code_entry* tr_exp(Node* root){
 
             res->op.kind = OP_STAR;
             res->result = *(new_temp());
-            res->arg1 = final_addr->result;
+            //res->arg1 = final_addr->result;
         }
     }
     add_code(res);
