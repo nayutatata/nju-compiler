@@ -329,8 +329,7 @@ code_entry* tr_exp(Node* root){
     } else if (root->ccnt == 3) {
         Node *c0 = getchild(root, 0), *c1 = getchild(root, 1), *c2 = getchild(root, 2);
         if (c0->ntype==_LP){// (exp)
-            res = tr_exp(c1);
-            add_code(res);
+            return  tr_exp(c1);
         } else if (c1->ntype == _LP) {  // f()
             operand_t* t = new_temp();
             sym_entry* se = find_sym_entry(c0->val.name);
