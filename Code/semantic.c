@@ -236,7 +236,7 @@ field_node* handle_vardec(Node* r, sym_type* type, int dim, int is_struct) {  //
     if (dim != 0){
         now_type = malloc(sizeof(sym_type));
         now_type->kind = SYM_ARRAY;
-        now_type->array_info.child_type = type;
+        now_type->array_info.type = type;
         now_type->array_info.num = dim;
         for (int i = 0; i < dim;i++){
             now_type->array_info.size[i] = size[dim - i - 1];

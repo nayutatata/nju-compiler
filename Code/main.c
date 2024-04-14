@@ -22,7 +22,7 @@ int main(int argc, char **argv)
         init_frame();
         //init_typetable();
         semantic_analysis(root);
-        print_symtable();
+        //print_symtable();
     }
     return 0;
 }
