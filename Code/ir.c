@@ -414,33 +414,6 @@ code_entry* tr_exp(Node* root){
         }
         else if (c0->ntype==_Exp){ //array
             // one-dimension
-            Node* array = getchild(root, 0);
-            Node* id = getchild(array, 0);
-            Node* exp = getchild(root, 2);
-            sym_entry* se = find_sym_entry(id->val.name);
-
-            code_entry* exp_ce = tr_exp(exp);  // offset
-
-            code_entry* addr = new_ce();
-            addr->op.kind = OP_ADDR;
-            addr->arg1.kind = OPE_VAR;
-            strcpy(addr->arg1.name, se->name);
-            addr->result = *(new_temp());
-            add_code(addr);
-
-            code_entry* elem_addr = new_ce();
-            elem_addr->op.kind = OP_MUL;
-            elem_addr->arg1 = *(new_imm(4));
-            elem_addr->arg2 = exp_ce->result;
-            elem_addr->result = *(new_temp());
-            add_code(elem_addr);
-
-            code_entry* final_addr = new_ce();
-            final_addr->op.kind = OP_PLUS;
-            final_addr->arg1 = addr->result;
-            final_addr->arg2 = elem_addr->result;
-            final_addr->result = *(new_temp());
-            add_code(final_addr);
 
             res->op.kind = OP_STAR;
             res->result = *(new_temp());
@@ -523,4 +496,33 @@ void tr_cond(Node* root,operand_t true_label,operand_t false_label){
     res2->op.kind = OP_GOTO;
     res2->result = false_label;
     add_code(res2);
+}
+code_entry* get_addr(Node* root){
+    Node* array = getchild(root, 0);
+    Node* id = getchild(array, 0);
+    Node* exp = getchild(root, 2);
+    sym_entry* se = find_sym_entry(id->val.name);
+
+    code_entry* exp_ce = tr_exp(exp);  // offset
+
+    code_entry* addr = new_ce();
+    addr->op.kind = OP_ADDR;
+    addr->arg1.kind = OPE_VAR;
+    strcpy(addr->arg1.name, se->name);
+    addr->result = *(new_temp());
+    add_code(addr);
+
+    code_entry* elem_addr = new_ce();
+    elem_addr->op.kind = OP_MUL;
+    elem_addr->arg1 = *(new_imm(4));
+    elem_addr->arg2 = exp_ce->result;
+    elem_addr->result = *(new_temp());
+    add_code(elem_addr);
+
+    code_entry* final_addr = new_ce();
+    final_addr->op.kind = OP_PLUS;
+    final_addr->arg1 = addr->result;
+    final_addr->arg2 = elem_addr->result;
+    final_addr->result = *(new_temp());
+    add_code(final_addr);
 }

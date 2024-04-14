@@ -22,7 +22,13 @@ char* show_info(sym_type* type){
     }
     if (kind==SYM_ARRAY){
         char* a = show_info(type->array_info.type);
-        sprintf(res, "array of %s, dim: %d", a, type->array_info.num);
+        sprintf(res, "array of %s, dim: %d, ", a, type->array_info.num);
+        strcat(res, "size of each dims: ");
+        for (int i = 0; i < type->array_info.num;i++){
+            char a[20];
+            sprintf(a, "%d, ", type->array_info.size[i]);
+            strcat(res, a);
+        }
         return res;
     }
     if (kind==SYM_FUNC){

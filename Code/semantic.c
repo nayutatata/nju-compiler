@@ -169,6 +169,7 @@ sym_type* handle_tag(Node* r){
 }
 field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in fact this return-type is not good, the right one should be sym_type, but I can get it by return-val->type, haha
     assert(r->ntype == _VarDec);
+    static int size[40];
     if (r->ccnt == 1) {
         field_node* res = malloc(sizeof(field_node));
         strcpy(res->name, getchild(r, 0)->val.name);
@@ -200,6 +201,9 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
         array_type->kind = SYM_ARRAY;
         array_type->array_info.num = dim;
         array_type->array_info.type = type;
+        for (int i = 0; i < dim;i++){
+            array_type->array_info.size[i] = size[dim - 1 - i];
+        }
         res->type = array_type;
         sym_entry* se = new_sym_entry(getchild(r, 0), array_type);
         sym_entry* detect = find_sym_entry_frame(se->name);
@@ -220,7 +224,9 @@ field_node* handle_vardec(Node *r,sym_type* type,int dim,int is_struct){ // in f
         add_sym_entry(se);
         return res;
     }
-    return handle_vardec(getchild(r, 0), type, dim + 1,is_struct);
+    Node* int_imm = getchild(r, 2);
+    size[dim] = int_imm->val.intv;
+    return handle_vardec(getchild(r, 0), type, dim + 1, is_struct);
 }
 sym_type* handle_funcdec(Node* r,sym_type* return_type){
     assert(r->ntype == _FunDec);
@@ -476,7 +482,6 @@ sym_type* handle_exp(Node* r){
             sym_type* struct_type = handle_exp(child0);
             if (struct_type->kind != SYM_STRUCT) {
                 semantic_error(13, child0->nline);
-                puts(show_info(struct_type));
                 return new_empty_type();
             }
             field_node* finder = struct_type->struct_info;

@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
         //init_typetable();
         add_other();
         semantic_analysis(root);
-        //print_symtable();
+        print_symtable();
         init_code_list();
         translate(root);
         print_code_list(output);
