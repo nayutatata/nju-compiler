@@ -94,4 +94,5 @@ void tr_cond(Node* root, operand_t true_label, operand_t false_label);
 operand_t get_addr(Node* root, int dim);
 code_entry* process_assign(operand_t a, operand_t b);
 operand_t to_value(operand_t ope);
+operand_t get_array(operand_t ope);
 #endif

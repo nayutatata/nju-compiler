@@ -1,0 +1,12 @@
+FUNCTION main :
+n := #1
+IF n != #0 GOTO label2
+GOTO label1
+LABEL label2 :
+i := #1
+IF i != #0 GOTO label0
+GOTO label1
+LABEL label0 :
+WRITE n
+LABEL label1 :
+RETURN #0
