@@ -46,6 +46,7 @@ typedef struct operand_t {
     float imm_fv;
     int is_arr;
     int is_arg;
+    int should_be_array;
 } operand_t;
 typedef struct operator_t{
     char name[20];      // name of operator

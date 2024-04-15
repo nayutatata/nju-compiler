@@ -51,6 +51,7 @@ typedef struct sym_entry
     sym_type *type;
     int line, col;
     struct sym_entry *next;
+    int is_array_param;
 } sym_entry;
 typedef struct type_entry{
     char name[40];
