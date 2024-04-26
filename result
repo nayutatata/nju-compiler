@@ -17,13 +17,13 @@ normal1 test [2018-C-1.cmm] matched (60613 inst)
 normal1 test [2018-C-2.cmm] matched (1866 inst)
 normal1 test [2018-D-1.cmm] matched (58424 inst)
 normal2 test [2020-A_1.cmm] matched (27 inst)
-normal2 test [2020-A_2.cmm] matched (179 inst)
+normal2 test [2020-A_2.cmm] matched (163 inst)
 normal2 test [2020-A_3.cmm] matched (165 inst)
 normal2 test [2020-A_4.cmm] matched (656 inst)
 normal2 test [2020-A_5.cmm] matched (122 inst)
 normal2 test [2020-B_1.cmm] matched (97 inst)
 normal2 test [2020-B_2.cmm] matched (1347 inst)
-normal2 test [2020-B_3.cmm] matched (6506 inst)
+normal2 test [2020-B_3.cmm] matched (6498 inst)
 normal2 test [2020-C_1.cmm] matched (538 inst)
 normal2 test [2020-C_2.cmm] matched (12133 inst)
 normal2 test [2020-D_1.cmm] matched (118162 inst)
@@ -40,12 +40,7 @@ normal3 test [C-2.cmm] matched (7780 inst)
 normal3 test [D-1.cmm] matched (848057 inst)
 normal4 test [A-1.cmm] matched (27 inst)
 normal4 test [A-2.cmm] matched (52 inst)
-parser: ir.c:675: process_assign: Assertion `0' failed.
-timeout: the monitored command dumped core
-[0;31m[1m normal4 test [A-3.cmm] RE or TLE [0m(B[m
-[1m[91mWrong on input [-10, -100, 12, 33, 5]
-Output mismatch!(you output more than supposed?)[0m[0m
-[0;31m[1m normal4 test [A-3.cmm] mismatch or TLE [0m(B[m
+normal4 test [A-3.cmm] matched (642 inst)
 normal4 test [A-4.cmm] matched (150 inst)
 normal4 test [A-5.cmm] matched (376 inst)
 normal4 test [B-1.cmm] matched (332 inst)
@@ -58,16 +53,14 @@ handmade test [m1.cmm] matched (6 inst)
 handmade test [m2.cmm] matched (45 inst)
 handmade test [yzy10.cmm] matched (259 inst)
 handmade test [yzy12.cmm] matched (56 inst)
-[1m[91mWrong on input [0, 0]
-Output mismatch! expected 0, found 1 at line 1[0m[0m
-[0;31m[1m handmade test [yzy13.cmm] mismatch or TLE [0m(B[m
+handmade test [yzy13.cmm] matched (78 inst)
 handmade test [yzy15.cmm] matched (10 inst)
 handmade test [yzy16.cmm] matched (14 inst)
 handmade test [yzy17.cmm] matched (52 inst)
 handmade test [yzy19.cmm] matched (95 inst)
 handmade test [yzy1.cmm] matched (71 inst)
 handmade test [yzy3.cmm] matched (45 inst)
-handmade test [yzy4.cmm] matched (56 inst)
+handmade test [yzy4.cmm] matched (34 inst)
 handmade test [yzy5.cmm] matched (111 inst)
 handmade test [yzy6.cmm] matched (13 inst)
 handmade test [yzy7.cmm] matched (11 inst)
@@ -75,6 +68,48 @@ handmade test [yzy8.cmm] matched (17 inst)
 handmade test [yzy9.cmm] matched (56 inst)
 handmade test [ZZ0.cmm] matched (0 inst)
 handmade test [zzw-2.cmm] matched (74 inst)
-handmade test [zzw-3.cmm] matched (30 inst)
-PASSED 65/67
-irsim executes about 1174620 instructions
+handmade test [zzw-3.cmm] matched (21 inst)
+extend1 test [2018-E1-1.cmm] passed
+extend1 test [2018-E1-2.cmm] passed
+extend1 test [2018-E1-3.cmm] passed
+extend1 test [2023-E1-1.cmm] passed
+extend1 test [2023-E1-2.cmm] passed
+extend1 test [2023-E1-3.cmm] passed
+extend1 test [E1-1.cmm] passed
+extend1 test [E1_1.cmm] passed
+extend1 test [E1-2.cmm] passed
+extend1 test [E1_2.cmm] passed
+extend1 test [E1-3.cmm] passed
+extend1 test [E1_3.cmm] passed
+extend1 test [op-sample1.cmm] passed
+extend1 test [yzy14.cmm] passed
+extend1 test [yzy2.cmm] passed
+extend2 test [2018-E2-1.cmm] matched (3059 inst)
+extend2 test [2018-E2-2.cmm] matched (249 inst)
+extend2 test [2018-E2-3.cmm] matched (4584 inst)
+extend2 test [2023-E2-1.cmm] matched (3384 inst)
+extend2 test [2023-E2-2.cmm] matched (5779 inst)
+extend2 test [2023-E2-3.cmm] matched (1188 inst)
+extend2 test [E2-1.cmm] matched (1258 inst)
+extend2 test [E2_1.cmm] matched (1258 inst)
+extend2 test [E2-2.cmm] matched (348 inst)
+extend2 test [E2_2.cmm] matched (378 inst)
+extend2 test [E2-3.cmm] matched (1370 inst)
+extend2 test [E2_3.cmm] matched (1188 inst)
+extend2 test [op-sample2.cmm] matched (162 inst)
+extend2 test [yzy11.cmm] matched (465 inst)
+extend2 test [yzy18.cmm] matched (231 inst)
+extend2 test [zt_knapsack.cmm] matched (3883 inst)
+extend2 test [zt_quicksort.cmm] matched (1167 inst)
+extend2 test [zty-2.cmm] matched (32354 inst)
+extend2 test [zty-3.cmm] matched (7410 inst)
+extend2 test [zty-4.cmm] matched (3817 inst)
+extendboth test [kita1.cmm] passed
+extendboth test [kita2.cmm] passed
+extendboth test [zt_comprehensive.cmm] passed
+extendboth test [zty-1.cmm] passed
+extendboth test [zzw-1.cmm] passed
+extendprf test [ZM.cmm] passed
+extendprf test [ZMpro.cmm] passed
+PASSED 109/109
+irsim executes about 1248817 instructions
