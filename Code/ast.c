@@ -55,7 +55,10 @@ Node* typeNode(ttype a){
 Node* idNode(char* name){
     Node *res = newNode();
     res->ntype = _ID;
-    strcpy(res->val.name, name);
+    if (strcmp(name,"main")==0||strcmp(name,"read")==0||strcmp(name,"write")==0)
+        strcpy(res->val.name, name);
+    else
+        sprintf(res->val.name, "_%s", name);
     return res;
 }
 Node* normalNode(Symbol a){

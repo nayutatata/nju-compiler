@@ -4,6 +4,7 @@
 #include "symboltable.h"
 #include "semantic.h"
 #include "ir.h"
+#include "target.h"
 #include <assert.h>
 extern Node *root;
 extern FILE *yyin;
@@ -19,7 +20,7 @@ int main(int argc, char** argv) {
     yyrestart(yyin);
     yyparse();
     if (!has_error){
-        print_ast();
+        //print_ast();
         init_symtable();
         init_frame();
         //init_typetable();
@@ -30,7 +31,10 @@ int main(int argc, char** argv) {
         translate(root);
         if (argc>2)
             output = fopen(argv[2], "w");
-        print_code_list(output);
+        else
+            output = stdout;
+        print_code_list(stdout);
+        gen_target();
     }
     return 0;
 }
