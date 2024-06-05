@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
             output = fopen(argv[2], "w");
         else
             output = stdout;
-        print_code_list(stdout);
+        //print_code_list(stdout);
         gen_target();
     }
     return 0;

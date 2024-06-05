@@ -2,7 +2,7 @@
 #include <string.h>
 #include <assert.h>
 extern FILE* output;
-static const int max_stack_space = 20000;
+static const int max_stack_space = 4000;
 static const int INIT_ARGOFF = 20;
 static record_t* record = NULL;
 static int now_off = -4;
@@ -98,6 +98,14 @@ static void dec_write(){
 static void dec_read(){
     char* name = "read:\n  li $v0,4\n  la $a0,_prompt\n  syscall\n  li $v0,5\n  syscall\n  jr $ra\n";
     fprintf(output, "%s",name);
+}
+static void clear_args(char* funcname){
+    sym_entry* se = find_sym_entry(funcname);
+    int n = 0;
+    for (field_node* head = se->type->func_info.param_types; head;head=head->next){
+        n++;
+    }
+    fprintf(output, "  addi $sp,%d\n", 4 * n);
 }
 void gen_target() {
     gen_head();
@@ -266,6 +274,7 @@ void gen_call(code_entry* ce){
     pushall();
     fprintf(output, "  jal %s\n", ce->arg1.name);
     popall();
+    clear_args(ce->arg1.name);
     int r = get_reg();
     int off = get_off(ce->result.name);
     fprintf(output, "  move %s,$v0\n", rt[r]);
