@@ -7,6 +7,7 @@ static const int INIT_ARGOFF = 20;
 static record_t* record = NULL;
 static int now_off = -4;
 static int argoff;
+static set_entry* name_set;
 static record_t* new_r(char* name, int off) {
     record_t* t = malloc(sizeof(record_t));
     strcpy(t->name, name);
@@ -112,10 +113,10 @@ void gen_target() {
     dec_read();
     dec_write();
     for (int i = 0; i < clst.num; i++) {
-        gen_one(clst.lst[i]);
+        gen_one(clst.lst[i],i);
     }
 }
-void gen_one(code_entry* ce){
+void gen_one(code_entry* ce,int x){
     operand_kind opkind = ce->op.kind;
     switch (opkind){
         case OP_ASSIGN:{
@@ -163,7 +164,9 @@ void gen_one(code_entry* ce){
             break;
         }
         case OP_FUNCDEC:{
-            gen_funcdec(ce);
+            name_set = NULL;
+            int space = eval_space(x);
+            gen_funcdec(ce,space);
             break;
         }
         case OP_LABELDEC:{
@@ -297,10 +300,10 @@ void gen_if_goto(code_entry* ce){
         fprintf(output, "  ble %s,%s,%s\n", rt[r1], rt[r2], ce->result.name);
     }
 }
-void gen_funcdec(code_entry* ce){
+void gen_funcdec(code_entry* ce,int space){
     fprintf(output, "%s:\n", ce->arg1.name);
     fprintf(output, "  move $fp,$sp\n");
-    reserve_space(-max_stack_space);
+    reserve_space(-space);
     now_off = -4;
     argoff = INIT_ARGOFF;
 }
@@ -346,4 +349,41 @@ void gen_addr(code_entry* ce){
     fprintf(output, "  addi %s,$fp,%d\n", rt[r1], off);
     int off1 = get_off(ce->result.name);
     save(rt[r1], off1);
+}
+int insert(char* name){
+    if (strcmp(name,"")==0)
+        return 0;
+    if (name_set == NULL) {
+        set_entry* sete = malloc(sizeof(set_entry));
+        strcpy(sete->name, name);
+        sete->next = NULL;
+        name_set = sete;
+        return 1;
+    }
+    for (set_entry* head = name_set; head;head=head->next){
+        if (strcmp(head->name,name)==0){
+            return 0;
+        }
+    }
+    set_entry* sete = malloc(sizeof(set_entry));
+    strcpy(sete->name, name);
+    sete->next = name_set;
+    name_set = sete;
+    return 1;
+}
+int eval_space(int x){
+    int num_val = 0;
+    int array_dec = 0;
+    for (int i = x + 1; i < clst.num; i++) {
+        code_entry* ce = clst.lst[i];
+        if (ce->op.kind == OP_FUNCDEC)
+            break;
+        num_val+=insert(ce->arg1.name);
+        num_val += insert(ce->arg2.name);
+        num_val += insert(ce->result.name);
+        if (ce->op.kind==OP_DEC){
+            array_dec += atoi(ce->arg2.name);
+        }
+    }
+    return num_val * 4 + array_dec+20;
 }
